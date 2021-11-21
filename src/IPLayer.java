@@ -7,7 +7,25 @@ public class IPLayer implements BaseLayer {
     public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 
     _IP_HEADER m_sHeader;
-
+    
+    public ArrayList<_ROUTING_ELEMENT> Routing_Table = new ArrayList<_ROUTING_ELEMENT>();
+    
+    public class _ROUTING_ELEMENT {
+    	_IP_ADDR dstAddress;
+    	_IP_ADDR subnet;
+    	_IP_ADDR gateway;
+    	String flag;
+    	int adaptNum;
+    	
+    	public _ROUTING_ELEMENT(byte[] dst, byte[] subnet, byte[] gateway, String flag, int adaptNum) {
+    		this.dstAddress = new _IP_ADDR(dst);
+    		this.subnet = new _IP_ADDR(subnet);
+    		this.gateway = new _IP_ADDR(gateway);
+    		this.flag = flag;
+    		this.adaptNum = adaptNum;
+    	}
+    }
+    
     private class _IP_HEADER {
         byte ip_verlen;     // ip version->IPv4 : 4 (1 byte)
         byte ip_tos;        // type of service
@@ -51,6 +69,12 @@ public class IPLayer implements BaseLayer {
             this.addr[1] = (byte) 0x00;
             this.addr[2] = (byte) 0x00;
             this.addr[3] = (byte) 0x00;
+        }
+        public _IP_ADDR(byte[] addr) {
+            this.addr[0] = addr[0];
+            this.addr[1] = addr[1];
+            this.addr[2] = addr[2];
+            this.addr[3] = addr[3];
         }
     }
 
