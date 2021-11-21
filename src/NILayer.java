@@ -87,11 +87,9 @@ public class NILayer implements BaseLayer {
 	}
 
 	public boolean Receive() {
-		for( int i =0; i<m_AdapterObject.size(); i++) {
-		Receive_Thread thread = new Receive_Thread(m_AdapterObject.get(i), this.GetUpperLayer(0));
+		Receive_Thread thread = new Receive_Thread(m_AdapterObject.get(m_iNumAdapter), this.GetUpperLayer(0));
 		Thread obj = new Thread(thread);
 		obj.start();
-		}
 		return false;
 		
 	}
