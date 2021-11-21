@@ -28,6 +28,10 @@ interface BaseLayer {
 	public default boolean Send(byte[] input, int length, String dstIP) {
 		return false;
 	}
+	
+	public default boolean Send(byte[] input, int length, int PortNum) {
+		return false;
+	}
 
 	public default boolean Send(String filename) {
 		return false;
