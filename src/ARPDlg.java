@@ -53,18 +53,18 @@ public class ARPDlg extends JFrame implements BaseLayer {
 	JButton Delete_Button_Proxy;	// Delete 버튼
 	JDialog addDialog;			// add proxy 다이얼로그
 
-	// Gratuitous ARP
-	JTextField gratWrite;		// gratuitous MAC 텍스트필드
-	JButton gratSendButton;		// grat ARP 패킷 전송 버튼
-
 	// Source Address Setting
 	JButton Setting_Button;		// Source MAC, IP 세팅 버튼
 	JButton ARP_send_Button;	// ARP 패킷 전송 버튼
 	static JComboBox<String> NICComboBox;	// 랜카드 선택 ComboBox
-	JTextArea srcMacAddress;
-	JTextArea srcIPAddress;
-	JLabel lblsrcIP;
-	JLabel lblsrcMAC;
+	static JComboBox<String> NICComboBox2;	// 랜카드 선택 ComboBox2
+
+	// 임시 변수
+	byte[] srcMacAddr1;
+	byte[] srcIpAddr1;
+	byte[] srcMacAddr2;
+	byte[] srcIpAddr2;
+	// 임시 변수
 
 	int adapterNumber = 0;
 
@@ -202,23 +202,18 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		NICComboBox.setBounds(10, 50, 170, 20);
 		srcAddrSettingPanel.add(NICComboBox);
 
-		lblsrcMAC = new JLabel("Source Mac Address");
-		lblsrcMAC.setBounds(10, 80, 170, 20); //�쐞移� 吏��젙
-		srcAddrSettingPanel.add(lblsrcMAC); //panel 異붽�
+		NICComboBox2 = new JComboBox();
+		NICComboBox2.setBounds(10, 80, 170, 20);
+		srcAddrSettingPanel.add(NICComboBox2);
 
-		srcMacAddress = new JTextArea();
-		srcMacAddress.setBounds(10, 105, 170, 20);
-		srcMacAddress.setBorder(BorderFactory.createLineBorder(Color.black));
-		srcAddrSettingPanel.add(srcMacAddress);// src address
-
-		lblsrcIP = new JLabel("Source IP Address");
-		lblsrcIP.setBounds(10, 135, 190, 20);
-		srcAddrSettingPanel.add(lblsrcIP);
-
-		srcIPAddress = new JTextArea();
-		srcIPAddress.setBounds(10, 160, 170, 20);
-		srcIPAddress.setBorder(BorderFactory.createLineBorder(Color.black));
-		srcAddrSettingPanel.add(srcIPAddress);// dst address
+//		lblsrcMAC = new JLabel("Source Mac Address");
+//		lblsrcMAC.setBounds(10, 80, 170, 20); //�쐞移� 吏��젙
+//		srcAddrSettingPanel.add(lblsrcMAC); //panel 異붽�
+//
+//		srcMacAddress = new JTextArea();
+//		srcMacAddress.setBounds(10, 105, 170, 20);
+//		srcMacAddress.setBorder(BorderFactory.createLineBorder(Color.black));
+//		srcAddrSettingPanel.add(srcMacAddress);// src address
 
 		Setting_Button = new JButton("Setting");// setting
 		Setting_Button.setBounds(200, 105, 130, 20);
@@ -233,6 +228,11 @@ public class ARPDlg extends JFrame implements BaseLayer {
 			NICComboBox.addItem(pcapIf.getName());
 		}
 
+		for (int i = 0; i < tempNiLayer.getAdapterList().size(); i++) {
+			PcapIf pcapIf = tempNiLayer.GetAdapterObject(i); //
+			NICComboBox2.addItem(pcapIf.getName());
+		}
+
 		NICComboBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -241,9 +241,15 @@ public class ARPDlg extends JFrame implements BaseLayer {
 				adapterNumber = jcombo.getSelectedIndex();
 				System.out.println("Index: " + adapterNumber);
 				try {
-					srcMacAddress.setText("");
-					srcMacAddress.append(get_MacAddress(((NILayer) m_LayerMgr.GetLayer("NI"))
-							.GetAdapterObject(adapterNumber).getHardwareAddress()));
+					byte[] srcMacAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
+							.GetAdapterObject(adapterNumber).getHardwareAddress();
+					byte[] srcIpAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
+							.GetAdapterObject(adapterNumber).getAddresses().get(0).getAddr().getData();
+					get_MacAddress(srcMacAddr);	// print 용도
+					get_IpAddress(srcIpAddr);	// print 용도
+
+					srcMacAddr1 = srcMacAddr;
+					srcIpAddr1 = srcIpAddr;
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -251,12 +257,37 @@ public class ARPDlg extends JFrame implements BaseLayer {
 			}
 		});
 
-		try {
-			srcMacAddress.append(get_MacAddress(
-					((NILayer) m_LayerMgr.GetLayer("NI")).GetAdapterObject(adapterNumber).getHardwareAddress()));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		};
+
+		NICComboBox2.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// adapterNumber = NICComboBox.getSelectedIndex();
+				JComboBox jcombo = (JComboBox) e.getSource();
+				adapterNumber = jcombo.getSelectedIndex();
+				System.out.println("Index: " + adapterNumber);
+				try {
+					byte[] srcMacAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
+							.GetAdapterObject(adapterNumber).getHardwareAddress();
+					byte[] srcIpAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
+							.GetAdapterObject(adapterNumber).getAddresses().get(0).getAddr().getData();
+					get_MacAddress(srcMacAddr);	// print 용도
+					get_IpAddress(srcIpAddr);	// print 용도
+
+					srcMacAddr2 = srcMacAddr;
+					srcIpAddr2 = srcIpAddr;
+
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+
+//		try {
+//			srcMacAddress.append(get_MacAddress(
+//					((NILayer) m_LayerMgr.GetLayer("NI")).GetAdapterObject(adapterNumber).getHardwareAddress()));
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		};
 
 		// Source Address Setting GUI - END
 
@@ -327,35 +358,6 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		proxyManageButtonPanel.add(Delete_Button_Proxy);
 
 		// Proxy ARP Entry GUI - END
-
-		// Gratuitous ARP GUI - START
-		JPanel gratARPPanel = new JPanel();
-		gratARPPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Gratuitous ARP",
-				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		gratARPPanel.setBounds(380, 290, 360, 60);
-		contentPane.add(gratARPPanel);
-		gratARPPanel.setLayout(null);
-
-		JPanel gratInputPanel = new JPanel();
-		gratInputPanel.setBounds(10, 20, 340, 30);
-		gratARPPanel.add(gratInputPanel);
-		gratInputPanel.setLayout(null);
-
-		JLabel hwAddrLabel = new JLabel("H/W 주소");
-		hwAddrLabel.setBounds(0, 0, 60, 20);
-		gratInputPanel.add(hwAddrLabel);
-
-		gratWrite = new JTextField();
-		gratWrite.setBounds(65, 2, 170, 20);// 249
-		gratInputPanel.add(gratWrite);
-		gratWrite.setColumns(10);
-
-		gratSendButton = new JButton("Send");
-		gratSendButton.setBounds(245, 2, 80, 20);
-		gratSendButton.addActionListener(new sendButtonListener());
-		gratInputPanel.add(gratSendButton);
-
-		// Gratuitous ARP GUI - END
 
 		// DON'T DELETE THIS
 		setVisible(true);
@@ -428,31 +430,10 @@ public class ARPDlg extends JFrame implements BaseLayer {
 
 			if (e.getSource() == Setting_Button) { // Setting 버튼 클릭 이벤트 처리
 				// TODO: Setting 버튼 클릭 이벤트 처리
-				byte[] srcMAC = new byte[6];
-				byte[] srcIP = new byte[4];
+				AddressTable.add(new AddressTableEntry(srcIpAddr1, srcMacAddr1));
+				AddressTable.add(new AddressTableEntry(srcIpAddr2, srcMacAddr2));
+				System.out.println("Source Addr Table has been updated.");
 
-				String mac = srcMacAddress.getText();
-				String ip = srcIPAddress.getText();
-
-				String[] byte_mac = mac.split("-|:");
-				for (int i = 0; i < 6; i++) {
-					srcMAC[i] = (byte) Integer.parseInt(byte_mac[i], 16);
-				}
-
-				String[] byte_ip = ip.split("\\.");
-				for (int i = 0; i < 4; i++) {
-					srcIP[i] = (byte) Integer.parseInt(byte_ip[i], 10);
-				}
-
-				// 하위 레이어에 srcIP, srcMac 헤더 세팅
-				((IPLayer) m_LayerMgr.GetLayer("IP")).SetSrcIPAddress(srcIP);
-				((ARPLayer) m_LayerMgr.GetLayer("ARP")).SetSrcMacAddress(srcMAC);
-				((ARPLayer) m_LayerMgr.GetLayer("ARP")).SetSrcIPAddress(srcIP);
-				((EthernetLayer) m_LayerMgr.GetLayer("Ethernet")).SetEnetSrcAddress(srcMAC);
-
-				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber);
-
-				System.out.println("Source ip, mac Set");
 			}
 		}
 	}
@@ -479,22 +460,6 @@ public class ARPDlg extends JFrame implements BaseLayer {
 				byte[] bytes = input.getBytes();
 				((ApplicationLayer) m_LayerMgr.GetLayer("Application")).Send(bytes, bytes.length, dstIP);
 			}
-
-			if (e.getSource() == gratSendButton) { // gratuitous ARP Send 버튼 클릭 이벤트 처리
-				// TODO: gratuitous ARP Send 버튼 클릭 이벤트 처리 - 패킷 전송(Send) 구현
-				byte[] srcMAC = new byte[6];
-				String mac = gratWrite.getText();
-				
-				String[] byte_mac = mac.split("-|:");
-				for (int i = 0; i < 6; i++) {
-					srcMAC[i] = (byte) Integer.parseInt(byte_mac[i], 16);
-				}
-				
-				((ARPLayer) m_LayerMgr.GetLayer("ARP")).SetSrcMacAddress(srcMAC);
-				((EthernetLayer) m_LayerMgr.GetLayer("Ethernet")).SetEnetSrcAddress(srcMAC);
-				
-				((ApplicationLayer) m_LayerMgr.GetLayer("Application")).GARP_Send();
-			}
 		}
 
 	}
@@ -512,6 +477,21 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		} 
 		System.out.println("mac_address:" + MacAddress);
 		return MacAddress;
+	}
+
+	public String get_IpAddress(byte[] byte_IpAddress) { //MAC Byte二쇱냼瑜� String�쑝濡� 蹂��솚
+		String IpAddress = "";
+		for (int i = 0; i < 4; i++) {
+			//2�옄由� 16吏꾩닔瑜� ��臾몄옄濡�, 洹몃━怨� 1�옄由� 16吏꾩닔�뒗 �븵�뿉 0�쓣 遺숈엫.
+			IpAddress += String.valueOf(byte_IpAddress[i] & 0xFF);
+
+			if (i != 3) {
+				//2�옄由� 16吏꾩닔 �옄由� �떒�쐞 �뮘�뿉 "-"遺숈뿬二쇨린
+				IpAddress += ":";
+			}
+		}
+		System.out.println("ip_address:" + IpAddress);
+		return IpAddress;
 	}
 
 	public boolean Receive(byte[] input) { //硫붿떆吏� Receive
