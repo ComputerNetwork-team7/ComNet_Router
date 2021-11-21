@@ -78,6 +78,23 @@ public class EthernetLayer implements BaseLayer {
 		return true;
 	}
 	
+	//portNum 포함된 send
+	public boolean Send(byte[] input, int length, int portNum) {
+		if (isBroadcast(m_sHeader.enet_dstaddr.addr)) { // broadcast라면 ARP 요청인 것 - 0x0806 (ARP)
+			m_sHeader.enet_type[0] = (byte) 0x08;
+			m_sHeader.enet_type[1] = (byte) 0x06;
+		}
+		else {	// broadcast가 아니라면 일반 메시지 전송인 것이므로 0x0800 (IP)
+			m_sHeader.enet_type[0] = (byte) 0x08;
+			m_sHeader.enet_type[1] = (byte) 0x00;
+		}
+
+		// data에 헤더를 붙여서 Send
+		byte[] bytes = ObjToByte(m_sHeader, input, length);
+		this.GetUnderLayer().Send(bytes, length + 14, portNum);
+		return true;
+	}
+	
 
 	// Ethernet Header 제거 함수
 	public byte[] RemoveEthernetHeader(byte[] input, int length) {
