@@ -6,6 +6,8 @@ import org.jnetpcap.packet.PcapPacketHandler;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
+import java.io.IOException;
 
 public class NILayer implements BaseLayer {
 
