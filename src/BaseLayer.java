@@ -29,7 +29,7 @@ interface BaseLayer {
 		return false;
 	}
 	
-	public default boolean Send(byte[] input, int length, String dstIP, int portNum) {
+	public default boolean Send(byte[] input, int length, int PortNum) {
 		return false;
 	}
 
