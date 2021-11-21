@@ -112,6 +112,44 @@ public class IPLayer implements BaseLayer {
         }
         return true;
     }
+    
+    public byte[] calcMask(byte[] dstIp, byte[] mask) {
+    	/*
+    	 * 목적지 IP주소와 subnet mask의 bit AND 결과를 리턴 
+    	 */
+    	byte[] result = new byte[4];
+    	
+    	for(int i = 0; i < 4; i++) {
+    		result[i] = (byte) (dstIp[i] & mask[i]);
+    	}
+    	
+    	return result;
+    }
+    
+    public boolean compareIp(byte[] ip1, byte[] ip2) {
+    	/*
+    	 * 두 IP를 비교하여 같으면 true, 다르면 false를 리턴
+    	 */
+    	for(int i = 0; i < 4; i++) {
+    		if(ip1[i] != ip2[i]) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
+    public int selectPort(byte[] dstIp) {
+    	/*
+    	 * Routing Table을 조회하여 보내야 할 port number를 리턴
+    	 */
+    	for(int i = 0; i < this.Routing_Table.size(); i++) {
+    		byte[] mask_result = this.calcMask(dstIp, this.Routing_Table.get(i).subnet.addr);
+    		if(compareIp(this.Routing_Table.get(i).dstAddress.addr, mask_result)) {
+    			return this.Routing_Table.get(i).adaptNum;
+    		}
+    	}
+    	return -1;
+    }
 
     public boolean Send(byte[] input, int length, String dstIP) {
         // Header ip_dst Setting
