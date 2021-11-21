@@ -120,10 +120,10 @@ public class ARPLayer implements BaseLayer {
         return buf;
     }
     // Routing 
-    public byte[] ObjToByte(_ARP_HEADER Header, int adaptNum) {
+    public byte[] ObjToByte(_ARP_HEADER Header, int portNum) {
         byte[] buf = new byte[28];	
         
-        ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(adaptNum); 
+        ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(portNum); 
         
         buf[0] = Header.macType[0];
         buf[1] = Header.macType[1];
