@@ -181,8 +181,7 @@ public class ARPLayer implements BaseLayer {
         return true;
     }
     // Routing ARP_Send
-    public boolean Send(byte[] input, int length, String dstIP, int adaptNum) {
-        // TODO: Send 구현
+    public boolean Send(String dstIP, int PortNum) {
         // 엔트리 테이블에서 이미 있는 IP인지 확인
         // 없으면 엔트리 테이블에 추가
 
@@ -201,10 +200,10 @@ public class ARPLayer implements BaseLayer {
             m_sHeader.macAddrLen = (byte) 0x06;	// Mac Address 	: 6 bytes
             m_sHeader.ipAddrLen = (byte) 0x04;	// Ip Address 	: 4 bytes
             m_sHeader.opcode = intToByte2(1);	// ARP request 	: 0x01
-            byte[] bytes = ObjToByte(m_sHeader, adaptNum);
+            byte[] bytes = ObjToByte(m_sHeader, PortNum);
             
 //            this.GetUnderLayer().Send(bytes, bytes.length);
-            this.GetUnderLayer().Send(bytes, bytes.length, adaptNum);
+            this.GetUnderLayer().Send(bytes, bytes.length, PortNum);
             
         }         
         else {
