@@ -7,7 +7,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
+import java.io.*;
 
 public class NILayer implements BaseLayer {
 
@@ -47,8 +47,8 @@ public class NILayer implements BaseLayer {
 		int snaplen = 64 * 1024; // Capture all packets, no trucation
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 10 * 1000; // 10 seconds in millis
-		m_AdapterObject = Pcap.openLive(m_pAdapterList.get(m_iNumAdapter)
-				.getName(), snaplen, flags, timeout, errbuf);
+		m_AdapterObject.add(Pcap.openLive(m_pAdapterList.get(m_iNumAdapter)
+				.getName(), snaplen, flags, timeout, errbuf));
 	}
 
 	public PcapIf GetAdapterObject(int iIndex) {
@@ -80,15 +80,14 @@ public class NILayer implements BaseLayer {
 		ByteBuffer buf = ByteBuffer.wrap(input);
 		// start = System.currentTimeMillis();
 		if (m_AdapterObject.get(portNum).sendPacket(buf) != Pcap.OK) {
-			System.err.println(m_AdapterObject.getErr());
+			System.err.println(m_AdapterObject.get(portNum).getErr());
 			return false;
 		}
 		return true;
 	}
 
 	public boolean Receive() {
-		Receive_Thread thread = new Receive_Thread(m_AdapterObject,
-				this.GetUpperLayer(0));
+		Receive_Thread thread = new Receive_Thread(m_AdapterObject, this.GetUpperLayer(0));
 		Thread obj = new Thread(thread);
 		obj.start();
 
@@ -139,7 +138,7 @@ public class NILayer implements BaseLayer {
 		pUULayer.SetUnderLayer(this);
 
 	}
-}
+
 
 // --------추가 --------
 /*
@@ -154,7 +153,7 @@ public static String macToString(byte[] mac) {
 		}
 		return macString.substring(0, macString.length() - 1);
 	}
-
+/*
 public static String get_NIC_IP_Address(int portNum){
 	String[] IPdata = m_pAdapterList.get(portNum).getAddresses().get(0).getAddr().toString.split("\\.");
 	String ipString = IPdata[0].substring(7, IPdata[0].length()) + "." + IPdata[1] + "." + IPdata[2] + "."
@@ -172,6 +171,7 @@ public static String get_NIC_MAC_Address(int portNum) {
 		String macString = macToString(macAddress);
 		return macString;
 	}
+	*/
 //
 
 
@@ -181,7 +181,7 @@ class Receive_Thread implements Runnable {
 	BaseLayer UpperLayer;
 	//int portNum;
 
-	public Receive_Thread(Pcap m_AdapterObject, BaseLayer m_UpperLayerm, int portNum) {
+	public Receive_Thread(Pcap m_AdapterObject, BaseLayer m_UpperLayer) {
 		// TODO Auto-generated constructor stub
 		AdapterObject = m_AdapterObject;
 		UpperLayer = m_UpperLayer;
@@ -201,4 +201,5 @@ class Receive_Thread implements Runnable {
 			AdapterObject.loop(100000, jpacketHandler, "");
 		}
 	}
+}
 }
