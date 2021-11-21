@@ -45,13 +45,13 @@ public class ARPDlg extends JFrame implements BaseLayer {
 	JButton All_Delete_Button;	// All Delete 버튼
 	private JTextField targetIPWrite;
 
-	// Proxy ARP
-	JList list_proxy_arp;			// proxy arp entry list
-	static DefaultListModel model_proxy;	// 실제 proxy arp entry 데이터
-	JScrollPane scroll_proxy;		// 스크롤 속성(proxy)
-	JButton Add_Button_Proxy;		// Add 버튼
-	JButton Delete_Button_Proxy;	// Delete 버튼
-	JDialog addDialog;			// add proxy 다이얼로그
+	// Routing Table
+	JList list_routing;			// routing table list
+	static DefaultListModel model_routing;	// 실제 routing table entry 데이터
+	JScrollPane scroll_routing;		// 스크롤 속성
+	JButton Add_Button_Routing;		// Add 버튼
+	JButton Delete_Button_Routing;	// Delete 버튼
+	JDialog addDialog;			// add routing entry 다이얼로그
 
 	// Source Address Setting
 	JButton Setting_Button;		// Source MAC, IP 세팅 버튼
@@ -87,9 +87,9 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		pLayerName = pName;
 
 		// Frame
-		setTitle("ARP Test");
+		setTitle("Static Router");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(250, 250, 770, 580);
+		setBounds(250, 250, 900, 580);
 		contentPane = new JPanel();
 		((JComponent) contentPane).setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -159,7 +159,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		});
 		arpCacheManageButtonPanel.add(All_Delete_Button);
 
-
+		/*
 		// target IP address input panel
 		JPanel targetIPaddrInputPanel = new JPanel();
 		targetIPaddrInputPanel.setBounds(10, 270, 340, 30);
@@ -182,7 +182,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		ARP_send_Button.setBounds(255, 2, 80, 20);
 		ARP_send_Button.addActionListener(new sendButtonListener());
 		targetIPaddrInputPanel.add(ARP_send_Button);
-
+		*/
 		// ARP Cache GUI - END
 
 		// Source Address Setting GUI - START
@@ -217,7 +217,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 //		srcAddrSettingPanel.add(srcMacAddress);// src address
 
 		Setting_Button = new JButton("Setting");// setting
-		Setting_Button.setBounds(200, 105, 130, 20);
+		Setting_Button.setBounds(200, 80, 130, 20);
 		Setting_Button.addActionListener(new setAddressListener());
 		srcAddrSettingPanel.add(Setting_Button);// setting
 
@@ -292,85 +292,90 @@ public class ARPDlg extends JFrame implements BaseLayer {
 
 		// Source Address Setting GUI - END
 
-		// Proxy ARP Entry GUI - START
-		// Proxy ARP Entry panel
-		JPanel proxyARPPanel = new JPanel();
-		proxyARPPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Proxy ARP Entry",
+		// Routing Table Entry GUI - START
+		// Routing Table Entry panel
+		JPanel routingPanel = new JPanel();
+		routingPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Routing Table Entry",
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		proxyARPPanel.setBounds(380, 5, 360, 280);
-		contentPane.add(proxyARPPanel);
-		proxyARPPanel.setLayout(null);
+		routingPanel.setBounds(380, 5, 470, 280);
+		contentPane.add(routingPanel);
+		routingPanel.setLayout(null);
 
-		// Proxy Entry Table panel
-		JPanel proxyARPTablePanel = new JPanel();
-		proxyARPTablePanel.setBounds(10, 15, 340, 210);
-		proxyARPPanel.add(proxyARPTablePanel);
-		proxyARPTablePanel.setLayout(null);
+		// Routing Table panel
+		JPanel routingTablePanel = new JPanel();
+		routingTablePanel.setBounds(10, 15, 450, 210);
+		routingPanel.add(routingTablePanel);
+		routingTablePanel.setLayout(null);
 
-		// Proxy Entry Table Items List
-		model_proxy = new DefaultListModel();
-		list_proxy_arp = new JList(model_proxy);
-		list_proxy_arp.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	// 하나만 선택가능하도록
-		scroll_proxy = new JScrollPane(list_proxy_arp);	// make scrollable
-		scroll_proxy.setBorder(BorderFactory.createEmptyBorder(0,5,5,5));
-		scroll_proxy.setBounds(0, 0, 340, 210);
-		proxyARPTablePanel.add(scroll_proxy);
+		// Routing Entry Table Items List
+		model_routing = new DefaultListModel();
+		list_routing = new JList(model_routing);
+		list_routing.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	// 하나만 선택가능하도록
+		scroll_routing = new JScrollPane(list_routing);	// make scrollable
+		scroll_routing.setBorder(BorderFactory.createEmptyBorder(0,5,5,5));
+		scroll_routing.setBounds(0, 0, 470, 210);
+		routingTablePanel.add(scroll_routing);
 
-		// Proxy Entry Item Manage Buttons panel
-		JPanel proxyManageButtonPanel = new JPanel();
-		proxyManageButtonPanel.setBounds(10, 230, 340, 30);
-		proxyARPPanel.add(proxyManageButtonPanel);
-		proxyManageButtonPanel.setLayout(null);
+		// Routing Entry Item Manage Buttons panel
+		JPanel routingManageButtonPanel = new JPanel();
+		routingManageButtonPanel.setBounds(10, 230, 340, 30);
+		routingPanel.add(routingManageButtonPanel);
+		routingManageButtonPanel.setLayout(null);
 
-		// Add Button - proxy
-		Add_Button_Proxy = new JButton("Add");
-		Add_Button_Proxy.setBounds(70, 2, 100, 25);
-		addDialog = new AddProxyDialog(this, "Proxy ARP Entry 추가");	// 추가 dialog
-		Add_Button_Proxy.addActionListener(new ActionListener () {
-			// Proxy ARP Entry 추가 다이얼로그 띄우기
+		// Add Button - routing
+		Add_Button_Routing = new JButton("Add");
+		Add_Button_Routing.setBounds(70, 2, 100, 25);
+		addDialog = new AddProxyDialog(this, "Routing Table Entry 추가");	// 추가 dialog
+		Add_Button_Routing.addActionListener(new ActionListener () {
+			// Routing Table Entry 추가 다이얼로그 띄우기
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (e.getSource() == Add_Button_Proxy) {
+				if (e.getSource() == Add_Button_Routing) {
 					addDialog.setVisible(true);
 				}
 			}
 		});
-		proxyManageButtonPanel.add(Add_Button_Proxy);
+		routingManageButtonPanel.add(Add_Button_Routing);
 
-		// Delete Button - proxy
-		Delete_Button_Proxy = new JButton("Delete");
-		Delete_Button_Proxy.setBounds(180, 2, 100, 25);
-		Delete_Button_Proxy.addActionListener(new ActionListener() {
+		// Delete Button - routing
+		Delete_Button_Routing = new JButton("Delete");
+		Delete_Button_Routing.setBounds(180, 2, 100, 25);
+		Delete_Button_Routing.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO: Delete 버튼 클릭 이벤트 처리 - DONE
-				if(e.getSource() == Delete_Button_Proxy) {
-					// ARPLayer의 DeleteProxyEntry() 함수를 불러서 지움
-					int selected_index = list_proxy_arp.getSelectedIndex();
+				if(e.getSource() == Delete_Button_Routing) {
+					int selected_index = list_routing.getSelectedIndex();
 					if(selected_index < 0) {	// 선택된 항목이 없는 경우 예외처리
-						if(model_proxy.size() == 0) return;	// 아무것도 없는경우
+						if(model_routing.size() == 0) return;	// 아무것도 없는경우
 						selected_index = 0;
 					}
-					String item = model_proxy.getElementAt(selected_index).toString();
-					ARPLayer.deleteProxyEntry(item.substring(20,39).trim());	// IP주소만 잘라서 key로 전달
+					String item = model_routing.getElementAt(selected_index).toString();
+					((IPLayer) m_LayerMgr.GetLayer("IP")).deleteRoutingEntry(selected_index);
 				}
 			}
 		});
-		proxyManageButtonPanel.add(Delete_Button_Proxy);
-
-		// Proxy ARP Entry GUI - END
+		routingManageButtonPanel.add(Delete_Button_Routing);
+		// Routing Table Entry GUI - END
 
 		// DON'T DELETE THIS
 		setVisible(true);
 	}
 
 	class AddProxyDialog extends JDialog {
-		JLabel DeviceLabel = new JLabel("Device");
-		JLabel HostIPLabel = new JLabel("IP 주소");
-		JLabel HostEthernetLabel = new JLabel("Ethernet 주소");
-		JTextField d_tf = new JTextField();	// device tf
-		JTextField ip_tf = new JTextField();	// ip tf
-		JTextField e_tf = new JTextField();	// ethernet tf
+		JLabel DestinationLabel = new JLabel("Destination");
+		JLabel NetmaskLabel = new JLabel("Netmask");
+		JLabel GatewayLabel = new JLabel("Gateway");
+		JLabel FlagLabel = new JLabel("Flag");
+		JLabel InterfaceLabel = new JLabel("Interface");
+
+		JTextField dest_tf = new JTextField();	// dest tf
+		JTextField netmask_tf = new JTextField();	// netmask tf
+		JTextField gateway_tf = new JTextField();	// gateway tf
+		JTextField flag_tf = new JTextField();	// flag tf
+		String ports[] = {"Port 1", "Port 2"};
+		JComboBox<String> combo = new JComboBox<String>(ports);
+
 		JButton OKButton;
 
 		public AddProxyDialog(JFrame frame, String title) {
@@ -379,13 +384,17 @@ public class ARPDlg extends JFrame implements BaseLayer {
 			JPanel jp = new JPanel();
 
 			JPanel subpanel = new JPanel();
-			subpanel.add(DeviceLabel);
-			subpanel.add(d_tf);
-			subpanel.add(HostIPLabel);
-			subpanel.add(ip_tf);
-			subpanel.add(HostEthernetLabel);
-			subpanel.add(e_tf);
-			subpanel.setLayout(new GridLayout(3,2));
+			subpanel.add(DestinationLabel);
+			subpanel.add(dest_tf);
+			subpanel.add(NetmaskLabel);
+			subpanel.add(netmask_tf);
+			subpanel.add(GatewayLabel);
+			subpanel.add(gateway_tf);
+			subpanel.add(FlagLabel);
+			subpanel.add(flag_tf);
+			subpanel.add(InterfaceLabel);
+			subpanel.add(combo);
+			subpanel.setLayout(new GridLayout(5,2));
 
 			BorderLayout bl = new BorderLayout();
 			jp.setLayout(bl);
@@ -395,29 +404,43 @@ public class ARPDlg extends JFrame implements BaseLayer {
 
 
 			add(jp);
-			setSize(400, 150);
+			setSize(300, 220);
 			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 			OKButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// TODO: 입력받은 정보를 Proxy Entry 리스트에 추가 후 창을 닫음
-					String hostName = d_tf.getText();
-					String hostIP = ip_tf.getText();
-					String hostEthernet = e_tf.getText();
+					// TODO: 입력받은 정보를 Routing Entry 리스트에 추가 후 창을 닫음
+					String dest = dest_tf.getText();
+					String netmask = netmask_tf.getText();
+					String gateway = gateway_tf.getText();
+					String flag = flag_tf.getText();
+					int interface_idx = combo.getSelectedIndex();
 
-					// hostEthernet의 :를 빼고 byte배열로 변환
-					String[] byte_mac = hostEthernet.split(":|-");
-					byte[] hostMac = new byte[6];
-					for (int i = 0; i < 6; i++) {
-						hostMac[i] = (byte) Integer.parseInt(byte_mac[i], 16);
+					String[] temp_strarr;
+
+					temp_strarr = dest.split("\\.");
+					byte[] dest_bytearr = new byte[4];
+					for (int i = 0; i < 4; i++) {
+						dest_bytearr[i] = (byte) Integer.parseInt(temp_strarr[i]);
 					}
-					// ARPLayer의 Proxy Entry 테이블에 추가하도록 함
-					ARPLayer.addProxyEntry(hostName, hostIP, hostMac);
 
-					d_tf.setText("");
-					ip_tf.setText("");
-					e_tf.setText("");
+					temp_strarr = netmask.split("\\.");
+					byte[] netmask_bytearr = new byte[4];
+					for (int i = 0; i < 4; i++) {
+						netmask_bytearr[i] = (byte) Integer.parseInt(temp_strarr[i]);
+					}
+
+					temp_strarr = gateway.split("\\.");
+					byte[] gateway_bytearr = new byte[4];
+					for (int i = 0; i < 4; i++) {
+						gateway_bytearr[i] = (byte) Integer.parseInt(temp_strarr[i]);
+					}
+
+					// IPLayer Routing Table에 추가
+					((IPLayer) m_LayerMgr.GetLayer("IP")).
+							addRoutingEntry(dest_bytearr, netmask_bytearr, gateway_bytearr, flag, interface_idx);
+
 					setVisible(false);	// 창 닫기
 				}
 			});
@@ -433,7 +456,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 				// TODO: Setting 버튼 클릭 이벤트 처리
 				AddressTable.add(new AddressTableEntry(srcIpAddr1, srcMacAddr1));
 				AddressTable.add(new AddressTableEntry(srcIpAddr2, srcMacAddr2));
-
+				
 				// Receive 실행
 				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber);
 				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber2);
@@ -539,32 +562,32 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		}
 	}
 
-	// GUI의 ProxyEntryWindow를 업데이트하는 함수
-	public static void UpdateProxyEntryWindow(Hashtable<String, ARPLayer._Proxy_Entry> table) {
-		model_proxy.removeAllElements();
-		if(table.size() > 0) {
-			for(Map.Entry<String, ARPLayer._Proxy_Entry> e : table.entrySet()) {
-				String ipAddr = e.getKey();	// IP 주소
-				if(ipAddr == null || ipAddr.length() == 0)	return;
-
-				String hostName = e.getValue().hostName;
-
-				String macAddr_string = "";
-				byte[] macAddr_bytearray = e.getValue().addr;	// mac 주소
-				// : 붙이기
-				macAddr_string += String.format("%02X", (0xFF & macAddr_bytearray[0])) + ":"
-						+ String.format("%02X", (0xFF & macAddr_bytearray[1])) + ":"
-						+ String.format("%02X", (0xFF & macAddr_bytearray[2])) + ":"
-						+ String.format("%02X", (0xFF & macAddr_bytearray[3])) + ":"
-						+ String.format("%02X", (0xFF & macAddr_bytearray[4])) + ":"
-						+ String.format("%02X", (0xFF & macAddr_bytearray[5]));
-
-				// Window에 표시될 최종 정보
-				String itemText = String.format("%-20s %-20s %-20s", hostName, ipAddr, macAddr_string);
-
-				model_proxy.addElement(itemText);
+	public static void UpdateRoutingTableWindow(ArrayList<IPLayer._ROUTING_ELEMENT> list) {
+		model_routing.removeAllElements();
+		if(list.size() > 0) {
+			for(IPLayer._ROUTING_ELEMENT element : list) {
+				String dest = ByteArrToIPString(element.dstAddress);
+				String netmask = ByteArrToIPString(element.subnet);
+				String gateway = ByteArrToIPString(element.gateway);
+				String flag = element.flag;
+				String interface_str = "";
+				if(element.adaptNum == 0)
+					interface_str = "Port 1";
+				else
+					interface_str = "Port 2";
+				String itemText = String.format("%-20s %-20s %-20s %-20s %-20s", dest, netmask, gateway, flag, interface_str);
+				model_routing.addElement(itemText);
 			}
 		}
+	}
+
+	public static String ByteArrToIPString(byte[] arr) {
+		String ret = "";
+		ret += String.valueOf(arr[0] & 0xFF) + "."
+				+ String.valueOf(arr[1] & 0xFF) + "."
+				+ String.valueOf(arr[2] & 0xFF) + "."
+				+ String.valueOf(arr[3] & 0xFF);
+		return ret;
 	}
 
 	@Override

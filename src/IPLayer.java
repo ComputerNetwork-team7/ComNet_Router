@@ -8,22 +8,35 @@ public class IPLayer implements BaseLayer {
 
     _IP_HEADER m_sHeader;
     
-    public ArrayList<_ROUTING_ELEMENT> Routing_Table = new ArrayList<_ROUTING_ELEMENT>();
+    public static ArrayList<_ROUTING_ELEMENT> Routing_Table = new ArrayList<_ROUTING_ELEMENT>();
     
     public class _ROUTING_ELEMENT {
-    	_IP_ADDR dstAddress;
-    	_IP_ADDR subnet;
-    	_IP_ADDR gateway;
+    	byte[] dstAddress;
+        byte[] subnet;
+        byte[] gateway;
     	String flag;
     	int adaptNum;
     	
     	public _ROUTING_ELEMENT(byte[] dst, byte[] subnet, byte[] gateway, String flag, int adaptNum) {
-    		this.dstAddress = new _IP_ADDR(dst);
-    		this.subnet = new _IP_ADDR(subnet);
-    		this.gateway = new _IP_ADDR(gateway);
+    		this.dstAddress = dst;
+    		this.subnet = subnet;
+    		this.gateway = gateway;
     		this.flag = flag;
     		this.adaptNum = adaptNum;
     	}
+    }
+
+    public void addRoutingEntry(byte[] dst, byte[] subnet, byte[] gateway, String flag, int adaptNum) {
+        _ROUTING_ELEMENT newItem = new _ROUTING_ELEMENT(dst, subnet, gateway, flag, adaptNum);
+        Routing_Table.add(newItem);
+
+        ARPDlg.UpdateRoutingTableWindow(Routing_Table);
+    }
+
+    public void deleteRoutingEntry(int idx) {
+        Routing_Table.remove(idx);
+
+        ARPDlg.UpdateRoutingTableWindow(Routing_Table);
     }
     
     private class _IP_HEADER {
@@ -62,7 +75,7 @@ public class IPLayer implements BaseLayer {
     }
 
     private class _IP_ADDR {
-        private byte[] addr = new byte[4];
+        byte[] addr = new byte[4];
 
         public _IP_ADDR() {
             this.addr[0] = (byte) 0x00;
@@ -142,10 +155,10 @@ public class IPLayer implements BaseLayer {
     	/*
     	 * Routing Table을 조회하여 보내야 할 port number를 리턴
     	 */
-    	for(int i = 0; i < this.Routing_Table.size(); i++) {
-    		byte[] mask_result = this.calcMask(dstIp, this.Routing_Table.get(i).subnet.addr);
-    		if(compareIp(this.Routing_Table.get(i).dstAddress.addr, mask_result)) {
-    			return this.Routing_Table.get(i).adaptNum;
+    	for(int i = 0; i < Routing_Table.size(); i++) {
+    		byte[] mask_result = this.calcMask(dstIp, Routing_Table.get(i).subnet);
+    		if(compareIp(Routing_Table.get(i).dstAddress, mask_result)) {
+    			return Routing_Table.get(i).adaptNum;
     		}
     	}
     	return -1;
