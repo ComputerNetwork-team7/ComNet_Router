@@ -67,6 +67,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 	// 임시 변수
 
 	int adapterNumber = 0;
+	int adapterNumber2 = 0;
 
 	public static void main(String[] args) {
 
@@ -263,13 +264,13 @@ public class ARPDlg extends JFrame implements BaseLayer {
 			public void actionPerformed(ActionEvent e) {
 				// adapterNumber = NICComboBox.getSelectedIndex();
 				JComboBox jcombo = (JComboBox) e.getSource();
-				adapterNumber = jcombo.getSelectedIndex();
-				System.out.println("Index: " + adapterNumber);
+				adapterNumber2 = jcombo.getSelectedIndex();
+				System.out.println("Index: " + adapterNumber2);
 				try {
 					byte[] srcMacAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
-							.GetAdapterObject(adapterNumber).getHardwareAddress();
+							.GetAdapterObject(adapterNumber2).getHardwareAddress();
 					byte[] srcIpAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
-							.GetAdapterObject(adapterNumber).getAddresses().get(0).getAddr().getData();
+							.GetAdapterObject(adapterNumber2).getAddresses().get(0).getAddr().getData();
 					get_MacAddress(srcMacAddr);	// print 용도
 					get_IpAddress(srcIpAddr);	// print 용도
 
@@ -432,6 +433,11 @@ public class ARPDlg extends JFrame implements BaseLayer {
 				// TODO: Setting 버튼 클릭 이벤트 처리
 				AddressTable.add(new AddressTableEntry(srcIpAddr1, srcMacAddr1));
 				AddressTable.add(new AddressTableEntry(srcIpAddr2, srcMacAddr2));
+
+				// Receive 실행
+				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber);
+				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber2);
+
 				System.out.println("Source Addr Table has been updated.");
 
 			}
