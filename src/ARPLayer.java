@@ -203,7 +203,8 @@ public class ARPLayer implements BaseLayer {
             m_sHeader.opcode = intToByte2(1);	// ARP request 	: 0x01
             byte[] bytes = ObjToByte(m_sHeader, adaptNum);
             
-            this.GetUnderLayer().Send(bytes, bytes.length);
+//            this.GetUnderLayer().Send(bytes, bytes.length);
+            this.GetUnderLayer().Send(bytes, bytes.length, adaptNum);
             
         }         
         else {
