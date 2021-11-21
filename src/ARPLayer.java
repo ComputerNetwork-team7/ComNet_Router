@@ -273,23 +273,6 @@ public class ARPLayer implements BaseLayer {
         ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
     }
 
-    // 새 proxy host를 해시테이블에 추가하는 함수
-    public static void addProxyEntry(String hostName, String ip, byte[] addr) {
-        _Proxy_Entry newItem = new _Proxy_Entry(addr, hostName);
-        Proxy_Entry_table.put(ip, newItem);
-
-        // GUI update
-        ARPDlg.UpdateProxyEntryWindow(Proxy_Entry_table);
-    }
-
-    // proxy host를 해시테이블에서 삭제하는 함수
-    public static void deleteProxyEntry(String ip_key) {
-        Proxy_Entry_table.remove(ip_key);
-
-        // GUI update
-        ARPDlg.UpdateProxyEntryWindow(Proxy_Entry_table);
-    }
-
     // ARPLayer가 받은 패킷의 ARP Header에서 dstIP를 확인하고
     // proxy table에 있는지 확인하는 함수
     public boolean IsProxyHost(byte[] input) {
