@@ -13,12 +13,24 @@ import java.util.Hashtable;
 import java.util.Map;
 
 public class ARPDlg extends JFrame implements BaseLayer {
+	
+	public class AddressTableEntry {
+		byte[] srcIpAddr;
+		byte[] srcMacAddr;
+		
+		public AddressTableEntry(byte[] srcIp, byte[] srcMac) {
+			// TODO Auto-generated constructor stub
+			this.srcIpAddr = srcIp;
+			this.srcMacAddr = srcMac;
+		}
+	}
 
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 	BaseLayer UnderLayer;
+	public static ArrayList<AddressTableEntry> AddressTable = new ArrayList<AddressTableEntry>();
 
 	private static LayerManager m_LayerMgr = new LayerManager();
 	
