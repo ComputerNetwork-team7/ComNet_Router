@@ -26,7 +26,7 @@ public class NILayer implements BaseLayer {
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 
 	int m_iNumAdapter;
-	public Pcap m_AdapterObject;
+	public static List<Pcap> m_AdapterObject = new ArrayList<>();
 	public PcapIf device;
 	public ArrayList<PcapIf> m_pAdapterList;
 	StringBuilder errbuf = new StringBuilder();
@@ -73,10 +73,11 @@ public class NILayer implements BaseLayer {
 		return m_pAdapterList;
 	}
 
-	public boolean Send(byte[] input, int length) {
+
+	public boolean Send(byte[] input, int length, int portNum) {
 		ByteBuffer buf = ByteBuffer.wrap(input);
 		// start = System.currentTimeMillis();
-		if (m_AdapterObject.sendPacket(buf) != Pcap.OK) {
+		if (m_AdapterObject.get(portNum).sendPacket(buf) != Pcap.OK) {
 			System.err.println(m_AdapterObject.getErr());
 			return false;
 		}
@@ -138,15 +139,51 @@ public class NILayer implements BaseLayer {
 	}
 }
 
+// --------추가 --------
+/*
+ 1. m_AdapterObject => ArrayList로 변경
+ 2. macToString, get_NIC_IP_Address, get_NIC_MAC_Address 메서드 추가
+ 3. Send함수 수정 => 인자로 portNum 추가
+*/
+public static String macToString(byte[] mac) {
+		String macString = "";
+		for (byte b : mac) {
+			macString += String.format("%02X:", b);
+		}
+		return macString.substring(0, macString.length() - 1);
+	}
+
+public static String get_NIC_IP_Address(int portNum){
+	String[] IPdata = m_pAdapterList.get(portNum).getAddresses().get(0).getAddr().toString.split("\\.");
+	String ipString = IPdata[0].substring(7, IPdata[0].length()) + "." + IPdata[1] + "." + IPdata[2] + "."
+				+ IPdata[3].substring(0, IPdata[3].length() - 1);
+		return ipString;
+	}
+
+public static String get_NIC_MAC_Address(int portNum) {
+		byte[] macAddress = null;
+		try {
+			macAddress = m_pAdapterList.get(portNum).getHardwareAddress();
+		} catch (IOException e) { 
+			e.printStackTrace(); 
+		}
+		String macString = macToString(macAddress);
+		return macString;
+	}
+//
+
+
 class Receive_Thread implements Runnable {
 	byte[] data;
 	Pcap AdapterObject;
 	BaseLayer UpperLayer;
+	//int portNum;
 
-	public Receive_Thread(Pcap m_AdapterObject, BaseLayer m_UpperLayer) {
+	public Receive_Thread(Pcap m_AdapterObject, BaseLayer m_UpperLayerm, int portNum) {
 		// TODO Auto-generated constructor stub
 		AdapterObject = m_AdapterObject;
 		UpperLayer = m_UpperLayer;
+		//this.portNum = portNum;
 	}
 
 	@Override
