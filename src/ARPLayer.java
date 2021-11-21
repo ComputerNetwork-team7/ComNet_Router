@@ -119,6 +119,34 @@ public class ARPLayer implements BaseLayer {
         }
         return buf;
     }
+    // Routing 
+    public byte[] ObjToByte(_ARP_HEADER Header, int adaptNum) {
+        byte[] buf = new byte[28];	
+        
+        ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(adaptNum); 
+        
+        buf[0] = Header.macType[0];
+        buf[1] = Header.macType[1];
+        buf[2] = Header.ipType[0];
+        buf[3] = Header.ipType[1];
+        buf[4] = Header.macAddrLen;
+        buf[5] = Header.ipAddrLen;
+        buf[6] = Header.opcode[0];
+        buf[7] = Header.opcode[1];
+        for (int i =0; i<6; i++) {
+        	buf[8+i] = temp.srcMacAddr[i];
+        }
+        for (int i =0; i<4; i++) {
+        	buf[14+i] = temp.srcIpAddr[i];
+        }
+        for (int i =0; i<6; i++) {
+        	buf[18+i] = Header.dstMac.addr[i];
+        }
+        for (int i =0; i<4; i++) {
+        	buf[24+i] = Header.dstIp.addr[i];
+        }
+        return buf;
+    }
     // ARP Request 
     public boolean Send(byte[] input, int length, String dstIP) {
         // TODO: Send 구현
@@ -152,6 +180,41 @@ public class ARPLayer implements BaseLayer {
 
         return true;
     }
+    // Routing ARP_Send
+    public boolean Send(byte[] input, int length, String dstIP, int adaptNum) {
+        // TODO: Send 구현
+        // 엔트리 테이블에서 이미 있는 IP인지 확인
+        // 없으면 엔트리 테이블에 추가
+
+        if(!ARP_Cache_table.containsKey(dstIP)) {   // 테이블에 없는 경우(ARP전송)
+            // 엔트리 테이블에 추가
+            addARPEntry(dstIP);
+            // EthernetLayer dstAddr를 Broadcast로 설정
+            byte[] dstAddr = new byte[6];
+            for(int i = 0; i < 6; i++) {	// FF-FF-FF-FF-FF-FF ( Broadcast )
+                dstAddr[i] = (byte) 0xFF;
+            }
+            ((EthernetLayer) this.GetUnderLayer()).SetEnetDstAddress(dstAddr);
+            
+            m_sHeader.macType = intToByte2(1);	// Hardwaretype : Ethernet
+            m_sHeader.ipType = intToByte2(8);	// IP field 	: 0x0800
+            m_sHeader.macAddrLen = (byte) 0x06;	// Mac Address 	: 6 bytes
+            m_sHeader.ipAddrLen = (byte) 0x04;	// Ip Address 	: 4 bytes
+            m_sHeader.opcode = intToByte2(1);	// ARP request 	: 0x01
+            byte[] bytes = ObjToByte(m_sHeader, adaptNum);
+            
+            this.GetUnderLayer().Send(bytes, bytes.length);
+            
+        }         
+        else {
+        	// 테이블에 있고 MAC 주소도 아는 경우 아무것도 하지 않음
+        	return true;
+        }
+
+        return true;
+    }
+    
+    
     // ARP Reply : receive에서 src주소와 dst주소를 뒤집은 Frame에 OPCODE 수정하여 반환함
     public boolean Send(byte[] reply_pack) {
     	byte[] temp = intToByte2(2);	// ARP Reply	: 0x02
