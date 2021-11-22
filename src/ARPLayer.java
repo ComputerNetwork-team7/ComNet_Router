@@ -203,7 +203,7 @@ public class ARPLayer implements BaseLayer {
             byte[] bytes = ObjToByte(m_sHeader, PortNum);
             
 //            this.GetUnderLayer().Send(bytes, bytes.length);
-            ARP_Send_Thread arpThread = new ARP_Send_Thread(input, input.length, PortNum);
+            ARP_Send_Thread arpThread = new ARP_Send_Thread(input, dstIP, PortNum);
             Thread obj = new Thread(arpThread);
 		    obj.start();// ARP Reply 대기
         }         
@@ -217,21 +217,24 @@ public class ARPLayer implements BaseLayer {
     
     class ARP_Send_Thread implements Runnable {
 		byte[] input;
+        int length;
         String dstIp;
 		int portNum;
 		
 		public ARP_Send_Thread(byte[] input, String dstIP,int portNum) {
             this.input = input;
-			this.dstIP = dstIP;
+			this.length = input.length;
+			this.dstIp = dstIP;
 			this.portNum = portNum;
 		}
-
+		
+	    
 		@Override
 		public void run() {
 			while(true) {
-				_ARP_Cache_Entry temp = ARP_Cache_table.get(dstIP);
-				if(temp.status.equals("Complete")){
-                    this.GetUnderLayer().Send(input, input.length, portNum);
+				_ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
+				if(temp.status){
+                    GetUnderLayer().Send(input, input.length, portNum);
 					break;
 				}
 			}
