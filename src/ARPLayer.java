@@ -189,6 +189,8 @@ public class ARPLayer implements BaseLayer {
     	String dstIP;
     	m_sHeader.dstIp.addr = byte_dstIP;
     	
+    	ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(PortNum); 
+    	
     	dstIP = ipByteToString(byte_dstIP); // 추출한 dstIP
     	
         if(!ARP_Cache_table.containsKey(dstIP)) {   // 테이블에 없는 경우(ARP전송)
@@ -206,7 +208,10 @@ public class ARPLayer implements BaseLayer {
             m_sHeader.macAddrLen = (byte) 0x06;	// Mac Address 	: 6 bytes
             m_sHeader.ipAddrLen = (byte) 0x04;	// Ip Address 	: 4 bytes
             m_sHeader.opcode = intToByte2(1);	// ARP request 	: 0x01
-            byte[] bytes = ObjToByte(m_sHeader, PortNum);
+            m_sHeader.srcIp.addr = temp.srcIpAddr;
+            m_sHeader.srcMac.addr = temp.srcMacAddr;
+            
+            byte[] bytes = ObjToByte(m_sHeader);
             
 //            this.GetUnderLayer().Send(bytes, bytes.length);
             ARP_Send_Thread arpThread = new ARP_Send_Thread(bytes, dstIP, PortNum);
