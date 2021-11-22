@@ -181,7 +181,7 @@ public class ARPLayer implements BaseLayer {
         return true;
     }
     // Routing ARP_Send
-    public boolean Send(String dstIP, int PortNum) {
+    public boolean Send(byte[] input,int length, String dstIP, int PortNum) {
         // 엔트리 테이블에서 이미 있는 IP인지 확인
         // 없으면 엔트리 테이블에 추가
 
@@ -203,8 +203,9 @@ public class ARPLayer implements BaseLayer {
             byte[] bytes = ObjToByte(m_sHeader, PortNum);
             
 //            this.GetUnderLayer().Send(bytes, bytes.length);
-            this.GetUnderLayer().Send(bytes, bytes.length, PortNum);
-            
+            ARP_Send_Thread arpThread = new ARP_Send_Thread(input, input.length, PortNum);
+            Thread obj = new Thread(arpThread);
+		    obj.start();// ARP Reply 대기
         }         
         else {
         	// 테이블에 있고 MAC 주소도 아는 경우 아무것도 하지 않음
@@ -213,6 +214,29 @@ public class ARPLayer implements BaseLayer {
 
         return true;
     }
+    
+    class ARP_Send_Thread implements Runnable {
+		byte[] input;
+        String dstIp;
+		int portNum;
+		
+		public ARP_Send_Thread(byte[] input, String dstIP,int portNum) {
+            this.input = input;
+			this.dstIP = dstIP;
+			this.portNum = portNum;
+		}
+
+		@Override
+		public void run() {
+			while(true) {
+				_ARP_Cache_Entry temp = ARP_Cache_table.get(dstIP);
+				if(temp.status.equals("Complete")){
+                    this.GetUnderLayer().Send(input, input.length, portNum);
+					break;
+				}
+			}
+		}
+	}
     
     
     // ARP Reply : receive에서 src주소와 dst주소를 뒤집은 Frame에 OPCODE 수정하여 반환함
