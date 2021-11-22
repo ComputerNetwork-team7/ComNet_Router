@@ -181,7 +181,7 @@ public class ARPLayer implements BaseLayer {
         return true;
     }
     // Routing ARP_Send
-    public boolean Send(byte[] input, int length, int PortNum) {
+    public synchronized boolean Send(byte[] input, int length, int PortNum) {
         // 엔트리 테이블에서 이미 있는 IP인지 확인
         // 없으면 엔트리 테이블에 추가
     	byte[] byte_dstIP = new byte[4];
@@ -217,7 +217,12 @@ public class ARPLayer implements BaseLayer {
             ARP_Send_Thread arpThread = new ARP_Send_Thread(bytes, dstIP, PortNum);
             Thread obj = new Thread(arpThread);
 		    obj.start();// ARP Reply 대기
-		    
+            try {
+                Thread.sleep(20000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
 		    // ARP 갖다 오면 이곳에서 시작
 		    byte[] macAddr = ARP_Cache_table.get(dstIP).addr;	// 캐시 테이블에서 Mac 주소 가져옴
 		    
@@ -251,10 +256,10 @@ public class ARPLayer implements BaseLayer {
 	    
 		@Override
 		public void run() {
-			while(true) {
-				_ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
+            GetUnderLayer().Send(input, input.length, portNum);
+            while(true) {
+                _ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
 				if(temp.status){
-                    GetUnderLayer().Send(input, input.length, portNum);
 					break;
 				}
 			}
