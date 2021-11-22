@@ -55,10 +55,10 @@ public class NILayer implements BaseLayer {
 		return m_pAdapterList.get(iIndex);
 	}
 
-	public void SetAdapterNumber(int iNum) {
+	public void SetAdapterNumber(int iNum, int PortNum) {
 		m_iNumAdapter = iNum;
 		PacketStartDriver();
-		Receive();
+		Receive(PortNum);
 	}
 
 	public void SetAdapterList() {
@@ -86,12 +86,11 @@ public class NILayer implements BaseLayer {
 		return true;
 	}
 
-	public boolean Receive() {
-		Receive_Thread thread = new Receive_Thread(m_AdapterObject.get(m_iNumAdapter), this.GetUpperLayer(0));
+	public boolean Receive(int PortNum) {
+		Receive_Thread thread = new Receive_Thread(m_AdapterObject.get(PortNum), this.GetUpperLayer(0));
 		Thread obj = new Thread(thread);
 		obj.start();
 		return false;
-		
 	}
 
 	@Override

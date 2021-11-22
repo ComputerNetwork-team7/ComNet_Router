@@ -458,8 +458,8 @@ public class ARPDlg extends JFrame implements BaseLayer {
 				AddressTable.add(new AddressTableEntry(srcIpAddr2, srcMacAddr2));
 				
 				// Receive 실행
-				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber);
-				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber2);
+				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber, 0);
+				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber2, 1);
 
 				System.out.println("Source Addr Table has been updated.");
 
