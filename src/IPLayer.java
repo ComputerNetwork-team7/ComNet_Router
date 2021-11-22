@@ -196,6 +196,12 @@ public class IPLayer implements BaseLayer {
         return true;
     }
 
+    public boolean Send(byte[] input, int length, int portNum) {
+
+        this.GetUnderLayer().Send(input, length, portNum); // to EthernetLayer
+
+        return true;
+    }
     //ARPLayer의 G-ARP Send 함수 호출.
     public boolean GARP_Send(){
         ((ARPLayer)((EthernetLayer)this.GetUnderLayer()).GetUpperLayer(0)).GARP_Send();
