@@ -216,11 +216,12 @@ public class IPLayer implements BaseLayer {
     }
 
     public synchronized boolean Receive(byte[] input) {
-        byte[] data;
 
-        data = RemoveIPHeader(input, input.length);
-        this.GetUpperLayer(0).Receive(data);
+        byte[] dstIP = new byte[4];
+        System.arraycopy(input,16,dstIP,0,4);
+        int portNum = selectPort(dstIP);
 
+        Send(input, input.length, portNum);
         return true;
     }
 
