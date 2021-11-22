@@ -181,10 +181,19 @@ public class ARPLayer implements BaseLayer {
         return true;
     }
     // Routing ARP_Send
-    public boolean Send(byte[] input,int length, String dstIP, int PortNum) {
+    public boolean Send(byte[] input, int length, int PortNum) {
         // 엔트리 테이블에서 이미 있는 IP인지 확인
         // 없으면 엔트리 테이블에 추가
-
+    	byte[] byte_dstIP = new byte[4];
+    	String dstIP;
+    	
+    	// dstIp 추출
+    	for (int i = 0; i<4; i++) {
+    		byte_dstIP[i] = input[i+38]; 
+    	}
+    	
+    	dstIP = ipByteToString(byte_dstIP); // 추출한 dstIP
+    	
         if(!ARP_Cache_table.containsKey(dstIP)) {   // 테이블에 없는 경우(ARP전송)
             // 엔트리 테이블에 추가
             addARPEntry(dstIP);
@@ -206,6 +215,16 @@ public class ARPLayer implements BaseLayer {
             ARP_Send_Thread arpThread = new ARP_Send_Thread(input, dstIP, PortNum);
             Thread obj = new Thread(arpThread);
 		    obj.start();// ARP Reply 대기
+		    
+		    // ARP 갖다 오면 이곳에서 시작
+		    byte[] macAddr = ARP_Cache_table.get(dstIP).addr;	// 캐시 테이블에서 Mac 주소 가져옴
+		    
+		    // Ping 패킷의 Mac 주소 업데이트 
+		    for (int i = 0; i<6; i++) {
+		    	input[i+32] = macAddr[i];
+		    }
+		    // 업데이트한 Ping 패킷 하위 레이어로 전송
+		    this.GetUnderLayer().Send(input, input.length, PortNum);
         }         
         else {
         	// 테이블에 있고 MAC 주소도 아는 경우 아무것도 하지 않음
