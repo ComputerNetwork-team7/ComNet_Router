@@ -198,7 +198,7 @@ public class IPLayer implements BaseLayer {
 
     public boolean Send(byte[] input, int length, int portNum) {
 
-        this.GetUnderLayer().Send(input, length, portNum); // to EthernetLayer
+        this.GetUnderLayer().GetUpperLayer(0).Send(input, length, portNum); // to EthernetLayer
 
         return true;
     }
