@@ -233,7 +233,7 @@ public class ARPLayer implements BaseLayer {
 
 		    
 		    // Ping 패킷의 Mac 주소 업데이트 
-		    System.arraycopy(macAddr, 0, input, 18, 6);
+		    System.arraycopy(macAddr, 0, input, 10, 6);
 		    
 		    // 업데이트한 Ping 패킷 하위 레이어로 전송
 		    this.GetUnderLayer().Send(input, input.length, PortNum);
