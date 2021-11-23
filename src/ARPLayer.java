@@ -8,7 +8,7 @@ public class ARPLayer implements BaseLayer {
     public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 
     // Key: IP 주소
-    public static Hashtable<String, _ARP_Cache_Entry> ARP_Cache_table = new Hashtable<>();// 우변 꺾쇠안에 타입 명시와 타입 명시하지 않는 차이가??
+    volatile public static Hashtable<String, _ARP_Cache_Entry> ARP_Cache_table = new Hashtable<>();// 우변 꺾쇠안에 타입 명시와 타입 명시하지 않는 차이가??
     public static Hashtable<String, _Proxy_Entry> Proxy_Entry_table = new Hashtable<>();
 
     _ARP_HEADER m_sHeader;
@@ -185,7 +185,7 @@ public class ARPLayer implements BaseLayer {
         // 엔트리 테이블에서 이미 있는 IP인지 확인
         // 없으면 엔트리 테이블에 추가
     	byte[] byte_dstIP = new byte[4];
-        System.arraycopy(input, 24, byte_dstIP, 0, 4);
+        System.arraycopy(input, 16, byte_dstIP, 0, 4);
     	String dstIP;
     	m_sHeader.dstIp.addr = byte_dstIP;
     	
@@ -204,27 +204,33 @@ public class ARPLayer implements BaseLayer {
             ((EthernetLayer) this.GetUnderLayer()).SetEnetDstAddress(dstAddr);
             
             m_sHeader.macType = intToByte2(1);	// Hardwaretype : Ethernet
-            m_sHeader.ipType = intToByte2(8);	// IP field 	: 0x0800
+            m_sHeader.ipType[0] = 0x08;	// IP field 	: 0x0800
+            m_sHeader.ipType[1] = 0x00;
             m_sHeader.macAddrLen = (byte) 0x06;	// Mac Address 	: 6 bytes
             m_sHeader.ipAddrLen = (byte) 0x04;	// Ip Address 	: 4 bytes
             m_sHeader.opcode = intToByte2(1);	// ARP request 	: 0x01
             m_sHeader.srcIp.addr = temp.srcIpAddr;
             m_sHeader.srcMac.addr = temp.srcMacAddr;
+            ((EthernetLayer) this.GetUnderLayer()).SetEnetSrcAddress(temp.srcMacAddr);
+
             
             byte[] bytes = ObjToByte(m_sHeader);
             
             //this.GetUnderLayer().Send(bytes, bytes.length);
-            ARP_Send_Thread arpThread = new ARP_Send_Thread(bytes, dstIP, PortNum);
+            Runnable arpThread = new ARP_Send_Thread(bytes, dstIP, PortNum);
             Thread obj = new Thread(arpThread);
 		    obj.start();// ARP Reply 대기
             try {
-                Thread.sleep(20000);
+                obj.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
 		    // ARP 갖다 오면 이곳에서 시작
-		    byte[] macAddr = ARP_Cache_table.get(dstIP).addr;	// 캐시 테이블에서 Mac 주소 가져옴
+            byte[] macAddr = new byte[6];
+		    macAddr = ARP_Cache_table.get(dstIP).addr;	// 캐시 테이블에서 Mac 주소 가져옴
+
+
 		    
 		    // Ping 패킷의 Mac 주소 업데이트 
 		    System.arraycopy(macAddr, 0, input, 18, 6);
@@ -258,6 +264,13 @@ public class ARPLayer implements BaseLayer {
 		public void run() {
             GetUnderLayer().Send(input, input.length, portNum);
             while(true) {
+                ((NILayer) GetUnderLayer().GetUnderLayer()).Receive(portNum);
+                System.out.println("run 반복중....");
+            	try {
+            		Thread.sleep(1000);
+            	} catch (InterruptedException e) {
+            		e.printStackTrace();
+            	}
                 _ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
 				if(temp.status){
 					break;

@@ -90,6 +90,8 @@ public class EthernetLayer implements BaseLayer {
 		}
 
 		// data에 헤더를 붙여서 Send
+		ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(portNum);
+		m_sHeader.enet_srcaddr.addr = temp.srcMacAddr;
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
 		this.GetUnderLayer().Send(bytes, length + 14, portNum);
 		return true;
@@ -123,6 +125,7 @@ public class EthernetLayer implements BaseLayer {
 	
 	// 수신 함수
 	public synchronized boolean Receive(byte[] input) {
+		System.out.println("리시브 ㅎㅎㅎㅎ");
 		byte[] data;
 		byte[] temp_src = m_sHeader.enet_srcaddr.addr;
 
@@ -130,6 +133,7 @@ public class EthernetLayer implements BaseLayer {
 		if(input[12] == (byte) 0x08 && input[13] == (byte) 0x06) {	// 0X0806 - ARP (첫 번째 상위레이어)
 			if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
 				data = RemoveEthernetHeader(input, input.length);
+				System.out.println("arp 전");
 				this.GetUpperLayer(0).Receive(data);	// To ARPLayer
 				return true;
 			}
@@ -138,6 +142,7 @@ public class EthernetLayer implements BaseLayer {
 		else if(input[12] == (byte) 0x08 && input[13] == (byte) 0x00) {	// 0x0800 - IP (두 번째 상위레이어)
 			if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
 				data = RemoveEthernetHeader(input, input.length);
+				System.out.println("ip 전");
 				this.GetUpperLayer(1).Receive(data);	// To IPLayer
 				return true;
 			}
