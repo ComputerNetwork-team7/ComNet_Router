@@ -185,7 +185,7 @@ public class ARPLayer implements BaseLayer {
         // 엔트리 테이블에서 이미 있는 IP인지 확인
         // 없으면 엔트리 테이블에 추가
     	byte[] byte_dstIP = new byte[4];
-        System.arraycopy(input, 24, byte_dstIP, 0, 4);
+        System.arraycopy(input, 16, byte_dstIP, 0, 4);
     	String dstIP;
     	m_sHeader.dstIp.addr = byte_dstIP;
     	
@@ -227,7 +227,7 @@ public class ARPLayer implements BaseLayer {
 		    byte[] macAddr = ARP_Cache_table.get(dstIP).addr;	// 캐시 테이블에서 Mac 주소 가져옴
 		    
 		    // Ping 패킷의 Mac 주소 업데이트 
-		    System.arraycopy(macAddr, 0, input, 18, 6);
+		    System.arraycopy(macAddr, 0, input, 10, 6);
 		    
 		    // 업데이트한 Ping 패킷 하위 레이어로 전송
 		    this.GetUnderLayer().Send(input, input.length, PortNum);
