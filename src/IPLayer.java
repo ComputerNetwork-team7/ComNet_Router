@@ -33,8 +33,8 @@ public class IPLayer implements BaseLayer {
         ARPDlg.UpdateRoutingTableWindow(Routing_Table);
     }
 
-    public void deleteRoutingEntry(int idx) {
-        Routing_Table.remove(idx);
+    public void deleteRoutingEntry(int i) {
+        Routing_Table.remove(i);
 
         ARPDlg.UpdateRoutingTableWindow(Routing_Table);
     }
@@ -91,7 +91,7 @@ public class IPLayer implements BaseLayer {
         }
     }
 
-    public byte[] objToByte(_IP_HEADER Header, byte[] input, int length) {//data�� ��� �ٿ��ֱ�
+    public byte[] objToByte(_IP_HEADER Header, byte[] input, int length) {//data占쏙옙 占쏙옙占� 占쌕울옙占쌍깍옙
         byte[] buf = new byte[length + 20];
 
         buf[0] = Header.ip_verlen;
@@ -128,7 +128,7 @@ public class IPLayer implements BaseLayer {
     
     public byte[] calcMask(byte[] dstIp, byte[] mask) {
     	/*
-    	 * 목적지 IP주소와 subnet mask의 bit AND 결과를 리턴 
+    	 * 紐⑹쟻吏� IP二쇱냼�� subnet mask�쓽 bit AND 寃곌낵瑜� 由ы꽩 
     	 */
     	byte[] result = new byte[4];
     	
@@ -141,7 +141,7 @@ public class IPLayer implements BaseLayer {
     
     public boolean compareIp(byte[] ip1, byte[] ip2) {
     	/*
-    	 * 두 IP를 비교하여 같으면 true, 다르면 false를 리턴
+    	 * �몢 IP瑜� 鍮꾧탳�븯�뿬 媛숈쑝硫� true, �떎瑜대㈃ false瑜� 由ы꽩
     	 */
     	for(int i = 0; i < 4; i++) {
     		if(ip1[i] != ip2[i]) {
@@ -153,7 +153,7 @@ public class IPLayer implements BaseLayer {
     
     public int selectPort(byte[] dstIp) {
     	/*
-    	 * Routing Table을 조회하여 보내야 할 port number를 리턴
+    	 * Routing Table�쓣 議고쉶�븯�뿬 蹂대궡�빞 �븷 port number瑜� 由ы꽩
     	 */
     	for(int i = 0; i < Routing_Table.size(); i++) {
     		byte[] mask_result = this.calcMask(dstIp, Routing_Table.get(i).subnet);
@@ -174,9 +174,9 @@ public class IPLayer implements BaseLayer {
         this.m_sHeader.ip_dst.addr = dstIP_bytearr;
 
         if(chkIfMyIP(dstIP_bytearr)){
-            // 내 IP이면 아무것도 안함
-            // ARP Send에서 dstIP가 자기자신이면 보내지 않아야 하므로
-            // GARP는 따로 GARPSend() 함수를 만드는게 좋을 것 같아요
+            // �궡 IP�씠硫� �븘臾닿쾬�룄 �븞�븿
+            // ARP Send�뿉�꽌 dstIP媛� �옄湲곗옄�떊�씠硫� 蹂대궡吏� �븡�븘�빞 �븯誘�濡�
+            // GARP�뒗 �뵲濡� GARPSend() �븿�닔瑜� 留뚮뱶�뒗寃� 醫뗭쓣 寃� 媛숈븘�슂
             return true;
         }
 
@@ -202,7 +202,7 @@ public class IPLayer implements BaseLayer {
 
         return true;
     }
-    //ARPLayer의 G-ARP Send 함수 호출.
+    //ARPLayer�쓽 G-ARP Send �븿�닔 �샇異�.
     public boolean GARP_Send(){
         ((ARPLayer)((EthernetLayer)this.GetUnderLayer()).GetUpperLayer(0)).GARP_Send();
         return true;
@@ -216,15 +216,69 @@ public class IPLayer implements BaseLayer {
     }
 
     public synchronized boolean Receive(byte[] input) {
-
-        byte[] dstIP = new byte[4];
-        System.arraycopy(input,16,dstIP,0,4);
-        int portNum = selectPort(dstIP);
-
-        Send(input, input.length, portNum);
-        return true;
+    	byte[] srcIp = new byte[4];
+		byte[] dstIp = new byte[4];
+		System.arraycopy(input, 12, srcIp, 0, 4);
+		System.arraycopy(input, 16, dstIp, 0, 4);
+		String dstIpStr = ipByteToString(dstIp);
+		String srcIpStr = ipByteToString(srcIp);
+		
+				if(dstIpStr.equals("192.168.100.255") || dstIpStr.equals("239.255.255.250")
+						|| srcIpStr.equals("192.168.100.1"))
+					return false;
+				
+				// Routing Table 탐색
+				for(int i = 0; i < Routing_Table.size(); i++) {
+					_ROUTING_ELEMENT temp = Routing_Table.get(i);
+					String dst_masked = calMask(dstIpStr, temp.subnet);
+					String nextAddress = null;
+					
+					if(temp.dstAddress.equals(dst_masked)) {
+						if(temp.flag.equals("U")) {
+							nextAddress = dstIpStr;
+						}
+						else if (temp.flag.equals("UG")) {
+							nextAddress = ipByteToString(temp.gateway);
+						}
+					}
+					if(nextAddress != null) {
+						this.GetUnderLayer().Send(input, input.length, temp.adaptNum);
+						return true;
+					}
+				}
+				return false;
+       
     }
-
+    
+    public static String calMask(String input, byte[] mask) {
+		byte[] inputByte =ipToByte(input);
+		byte[] maskByte = mask;
+		byte[] masking = new byte[4];
+		for(int i = 0; i < 4; i++) {
+			masking[i] = (byte) (inputByte[i] & maskByte[i]);
+		}
+		
+		return ipByteToString(masking);
+	}
+      
+    public static byte[] ipToByte(String ip) {
+		 String[] ipBuf = ip.split("[.]");
+		 byte[] buf = new byte[4];
+		 
+		 for(int i = 0; i < 4; i++) {
+			 buf[i] = (byte) Integer.parseInt(ipBuf[i]);
+		 }
+		 return buf;
+	 }
+    
+    public static String ipByteToString(byte[] something){
+        String temp = "";
+        for (byte b : something){
+            temp += Integer.toString(b & 0xFF) + "."; //0xff = 11111111(2) byte 정수변환
+        }
+        return temp.substring(0, temp.length() - 1);
+    }
+    
     private byte[] intToByte2(int value) {
         byte[] temp = new byte[2];
         temp[0] |= (byte) ((value & 0xFF00) >> 8);
