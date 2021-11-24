@@ -264,14 +264,7 @@ public class ARPLayer implements BaseLayer {
 		public void run() {
 			GetUnderLayer().Send(input, input.length, portNum);
             while(true) {
-                ((NILayer) GetUnderLayer().GetUnderLayer()).Receive(portNum);
-                System.out.println("run 반복중....");
-            	try {
-            		Thread.sleep(1000);
-            	} catch (InterruptedException e) {
-            		e.printStackTrace();
-            	}
-                _ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
+                 _ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
 				if(temp.status == true){
 					break;
 				}
