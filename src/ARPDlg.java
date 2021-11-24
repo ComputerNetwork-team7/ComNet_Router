@@ -39,40 +39,40 @@ public class ARPDlg extends JFrame implements BaseLayer {
 	// ARP Cache
 	JTextArea ARPCacheTableArea;
 	JList list_arp_cache;		// arp cache list
-	static DefaultListModel model_arp;	// 실제 arp cache 데이터
-	JScrollPane scroll_arp;		// 스크롤 속성(arp)
-	JButton Item_Delete_Button;	// Item Delete 버튼
-	JButton All_Delete_Button;	// All Delete 버튼
+	static DefaultListModel model_arp;	// �떎�젣 arp cache �뜲�씠�꽣
+	JScrollPane scroll_arp;		// �뒪�겕濡� �냽�꽦(arp)
+	JButton Item_Delete_Button;	// Item Delete 踰꾪듉
+	JButton All_Delete_Button;	// All Delete 踰꾪듉
 	private JTextField targetIPWrite;
 
 	// Routing Table
 	JList list_routing;			// routing table list
-	static DefaultListModel model_routing;	// 실제 routing table entry 데이터
-	JScrollPane scroll_routing;		// 스크롤 속성
-	JButton Add_Button_Routing;		// Add 버튼
-	JButton Delete_Button_Routing;	// Delete 버튼
-	JDialog addDialog;			// add routing entry 다이얼로그
+	static DefaultListModel model_routing;	// �떎�젣 routing table entry �뜲�씠�꽣
+	JScrollPane scroll_routing;		// �뒪�겕濡� �냽�꽦
+	JButton Add_Button_Routing;		// Add 踰꾪듉
+	JButton Delete_Button_Routing;	// Delete 踰꾪듉
+	JDialog addDialog;			// add routing entry �떎�씠�뼹濡쒓렇
 
 	// Source Address Setting
-	JButton Setting_Button;		// Source MAC, IP 세팅 버튼
-	JButton ARP_send_Button;	// ARP 패킷 전송 버튼
-	static JComboBox<String> NICComboBox;	// 랜카드 선택 ComboBox
-	static JComboBox<String> NICComboBox2;	// 랜카드 선택 ComboBox2
+	JButton Setting_Button;		// Source MAC, IP �꽭�똿 踰꾪듉
+	JButton ARP_send_Button;	// ARP �뙣�궥 �쟾�넚 踰꾪듉
+	static JComboBox<String> NICComboBox;	// �옖移대뱶 �꽑�깮 ComboBox
+	static JComboBox<String> NICComboBox2;	// �옖移대뱶 �꽑�깮 ComboBox2
 
-	// 임시 변수
+	// �엫�떆 蹂��닔
 	byte[] srcMacAddr1;
 	byte[] srcIpAddr1;
 	byte[] srcMacAddr2;
 	byte[] srcIpAddr2;
-	// 임시 변수
+	// �엫�떆 蹂��닔
 
 	int adapterNumber = 0;
 	int adapterNumber2 = 0;
 
 	public static void main(String[] args) {
 
-		// 모든 레이어 추가 및 연결
-		// 하위 계층의 순서를 정함
+		// 紐⑤뱺 �젅�씠�뼱 異붽� 諛� �뿰寃�
+		// �븯�쐞 怨꾩링�쓽 �닚�꽌瑜� �젙�븿
 		m_LayerMgr.AddLayer(new NILayer("NI"));
 		m_LayerMgr.AddLayer(new EthernetLayer("Ethernet"));
 		m_LayerMgr.AddLayer(new ARPLayer("ARP"));
@@ -113,7 +113,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		// Cache Table Items List
 		model_arp = new DefaultListModel();
 		list_arp_cache = new JList(model_arp);
-		list_arp_cache.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	// 하나만 선택가능하도록
+		list_arp_cache.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	// �븯�굹留� �꽑�깮媛��뒫�븯�룄濡�
 		scroll_arp = new JScrollPane(list_arp_cache);	// make scrollable
 		scroll_arp.setBorder(BorderFactory.createEmptyBorder(0,5,5,5));
 		scroll_arp.setBounds(0, 0, 340, 210);
@@ -133,12 +133,12 @@ public class ARPDlg extends JFrame implements BaseLayer {
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == Item_Delete_Button) {
 					int selected_index = list_arp_cache.getSelectedIndex();
-					if(selected_index < 0) {	// 선택된 항목이 없는 경우 예외처리
-						if(model_arp.size() == 0) return;	// 아무것도 없는경우
+					if(selected_index < 0) {	// �꽑�깮�맂 �빆紐⑹씠 �뾾�뒗 寃쎌슦 �삁�쇅泥섎━
+						if(model_arp.size() == 0) return;	// �븘臾닿쾬�룄 �뾾�뒗寃쎌슦
 						selected_index = 0;
 					}
 					String item = model_arp.getElementAt(selected_index).toString();
-					ARPLayer.deleteARPEntry(item.substring(0,19).trim());	// IP주소만 잘라서 key로 전달
+					ARPLayer.deleteARPEntry(item.substring(0,19).trim());	// IP二쇱냼留� �옒�씪�꽌 key濡� �쟾�떖
 				}
 			}
 		});
@@ -152,7 +152,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == All_Delete_Button) {
-					// TODO: 전체 항목 삭제 - DONE
+					// TODO: �쟾泥� �빆紐� �궘�젣 - DONE
 					ARPLayer.deleteAllARPEntry();
 				}
 			}
@@ -167,7 +167,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		targetIPaddrInputPanel.setLayout(null);
 
 		// target IP address input label
-		JLabel targetIPLabel = new JLabel("IP 주소");
+		JLabel targetIPLabel = new JLabel("IP 二쇱냼");
 		targetIPLabel.setBounds(0, 0, 50, 20);
 		targetIPaddrInputPanel.add(targetIPLabel);
 
@@ -208,8 +208,8 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		srcAddrSettingPanel.add(NICComboBox2);
 
 //		lblsrcMAC = new JLabel("Source Mac Address");
-//		lblsrcMAC.setBounds(10, 80, 170, 20); //�쐞移� 吏��젙
-//		srcAddrSettingPanel.add(lblsrcMAC); //panel 異붽�
+//		lblsrcMAC.setBounds(10, 80, 170, 20); //占쎌맄燁삼옙 筌욑옙占쎌젟
+//		srcAddrSettingPanel.add(lblsrcMAC); //panel �빊遺쏙옙
 //
 //		srcMacAddress = new JTextArea();
 //		srcMacAddress.setBounds(10, 105, 170, 20);
@@ -221,7 +221,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		Setting_Button.addActionListener(new setAddressListener());
 		srcAddrSettingPanel.add(Setting_Button);// setting
 
-		// NILayer로부터 랜카드 정보 가져오기
+		// NILayer濡쒕��꽣 �옖移대뱶 �젙蹂� 媛��졇�삤湲�
 		NILayer tempNiLayer = (NILayer) m_LayerMgr.GetLayer("NI");
 
 		for (int i = 0; i < tempNiLayer.getAdapterList().size(); i++) {
@@ -246,8 +246,8 @@ public class ARPDlg extends JFrame implements BaseLayer {
 							.GetAdapterObject(adapterNumber).getHardwareAddress();
 					byte[] srcIpAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
 							.GetAdapterObject(adapterNumber).getAddresses().get(0).getAddr().getData();
-					get_MacAddress(srcMacAddr);	// print 용도
-					get_IpAddress(srcIpAddr);	// print 용도
+					get_MacAddress(srcMacAddr);	// print �슜�룄
+					get_IpAddress(srcIpAddr);	// print �슜�룄
 
 					srcMacAddr1 = srcMacAddr;
 					srcIpAddr1 = srcIpAddr;
@@ -271,8 +271,8 @@ public class ARPDlg extends JFrame implements BaseLayer {
 							.GetAdapterObject(adapterNumber2).getHardwareAddress();
 					byte[] srcIpAddr = ((NILayer) m_LayerMgr.GetLayer("NI"))
 							.GetAdapterObject(adapterNumber2).getAddresses().get(0).getAddr().getData();
-					get_MacAddress(srcMacAddr);	// print 용도
-					get_IpAddress(srcIpAddr);	// print 용도
+					get_MacAddress(srcMacAddr);	// print �슜�룄
+					get_IpAddress(srcIpAddr);	// print �슜�룄
 
 					srcMacAddr2 = srcMacAddr;
 					srcIpAddr2 = srcIpAddr;
@@ -310,7 +310,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		// Routing Entry Table Items List
 		model_routing = new DefaultListModel();
 		list_routing = new JList(model_routing);
-		list_routing.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	// 하나만 선택가능하도록
+		list_routing.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	// �븯�굹留� �꽑�깮媛��뒫�븯�룄濡�
 		scroll_routing = new JScrollPane(list_routing);	// make scrollable
 		scroll_routing.setBorder(BorderFactory.createEmptyBorder(0,5,5,5));
 		scroll_routing.setBounds(0, 0, 470, 210);
@@ -325,9 +325,9 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		// Add Button - routing
 		Add_Button_Routing = new JButton("Add");
 		Add_Button_Routing.setBounds(70, 2, 100, 25);
-		addDialog = new AddProxyDialog(this, "Routing Table Entry 추가");	// 추가 dialog
+		addDialog = new AddProxyDialog(this, "Routing Table Entry 異붽�");	// 異붽� dialog
 		Add_Button_Routing.addActionListener(new ActionListener () {
-			// Routing Table Entry 추가 다이얼로그 띄우기
+			// Routing Table Entry 異붽� �떎�씠�뼹濡쒓렇 �쓣�슦湲�
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == Add_Button_Routing) {
@@ -343,11 +343,11 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		Delete_Button_Routing.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO: Delete 버튼 클릭 이벤트 처리 - DONE
+				// TODO: Delete 踰꾪듉 �겢由� �씠踰ㅽ듃 泥섎━ - DONE
 				if(e.getSource() == Delete_Button_Routing) {
 					int selected_index = list_routing.getSelectedIndex();
-					if(selected_index < 0) {	// 선택된 항목이 없는 경우 예외처리
-						if(model_routing.size() == 0) return;	// 아무것도 없는경우
+					if(selected_index < 0) {	// �꽑�깮�맂 �빆紐⑹씠 �뾾�뒗 寃쎌슦 �삁�쇅泥섎━
+						if(model_routing.size() == 0) return;	// �븘臾닿쾬�룄 �뾾�뒗寃쎌슦
 						selected_index = 0;
 					}
 					String item = model_routing.getElementAt(selected_index).toString();
@@ -410,7 +410,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 			OKButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// TODO: 입력받은 정보를 Routing Entry 리스트에 추가 후 창을 닫음
+					// TODO: �엯�젰諛쏆� �젙蹂대�� Routing Entry 由ъ뒪�듃�뿉 異붽� �썑 李쎌쓣 �떕�쓬
 					String dest = dest_tf.getText();
 					String netmask = netmask_tf.getText();
 					String gateway = gateway_tf.getText();
@@ -437,11 +437,11 @@ public class ARPDlg extends JFrame implements BaseLayer {
 						gateway_bytearr[i] = (byte) Integer.parseInt(temp_strarr[i]);
 					}
 
-					// IPLayer Routing Table에 추가
+					// IPLayer Routing Table�뿉 異붽�
 					((IPLayer) m_LayerMgr.GetLayer("IP")).
 							addRoutingEntry(dest_bytearr, netmask_bytearr, gateway_bytearr, flag, interface_idx);
 
-					setVisible(false);	// 창 닫기
+					setVisible(false);	// 李� �떕湲�
 				}
 			});
 		}
@@ -452,14 +452,14 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			if (e.getSource() == Setting_Button) { // Setting 버튼 클릭 이벤트 처리
-				// TODO: Setting 버튼 클릭 이벤트 처리
+			if (e.getSource() == Setting_Button) { // Setting 踰꾪듉 �겢由� �씠踰ㅽ듃 泥섎━
+				// TODO: Setting 踰꾪듉 �겢由� �씠踰ㅽ듃 泥섎━
 				AddressTable.add(new AddressTableEntry(srcIpAddr1, srcMacAddr1));
 				AddressTable.add(new AddressTableEntry(srcIpAddr2, srcMacAddr2));
 				
-				// Receive 실행
-				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber, 0);
-				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber2, 1);
+				// Receive �떎�뻾
+				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber);
+				((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(adapterNumber2);
 
 				System.out.println("Source Addr Table has been updated.");
 
@@ -470,11 +470,11 @@ public class ARPDlg extends JFrame implements BaseLayer {
 	class sendButtonListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == ARP_send_Button) { // ARP Send 버튼 클릭 이벤트 처리
-				// ARP Send 버튼 클릭 이벤트 처리 1 - ARP Cache Table Update
-				// ARPLayer에서 GUI Window update 함수 호출하는 것으로 대체
+			if (e.getSource() == ARP_send_Button) { // ARP Send 踰꾪듉 �겢由� �씠踰ㅽ듃 泥섎━
+				// ARP Send 踰꾪듉 �겢由� �씠踰ㅽ듃 泥섎━ 1 - ARP Cache Table Update
+				// ARPLayer�뿉�꽌 GUI Window update �븿�닔 �샇異쒗븯�뒗 寃껋쑝濡� ��泥�
 
-				// TODO: ARP Send 버튼 클릭 이벤트 처리 2 - 패킷 전송(Send) 구현
+				// TODO: ARP Send 踰꾪듉 �겢由� �씠踰ㅽ듃 泥섎━ 2 - �뙣�궥 �쟾�넚(Send) 援ы쁽
 				String dstIP = targetIPWrite.getText();
 
 				byte[] dstIP_bytearr = new byte[4];
@@ -484,7 +484,7 @@ public class ARPDlg extends JFrame implements BaseLayer {
 				}
 				((ARPLayer) m_LayerMgr.GetLayer("ARP")).SetDstIPAddress(dstIP_bytearr);
 
-				// AppLayer로 전송
+				// AppLayer濡� �쟾�넚
 				String input = "";	// data
 				byte[] bytes = input.getBytes();
 				((ApplicationLayer) m_LayerMgr.GetLayer("Application")).Send(bytes, bytes.length, dstIP);
@@ -493,14 +493,14 @@ public class ARPDlg extends JFrame implements BaseLayer {
 
 	}
 
-	public String get_MacAddress(byte[] byte_MacAddress) { //MAC Byte二쇱냼瑜� String�쑝濡� 蹂��솚
+	public String get_MacAddress(byte[] byte_MacAddress) { //MAC Byte雅뚯눘�꺖�몴占� String占쎌몵嚥∽옙 癰귨옙占쎌넎
 		String MacAddress = "";
 		for (int i = 0; i < 6; i++) { 
-			//2�옄由� 16吏꾩닔瑜� ��臾몄옄濡�, 洹몃━怨� 1�옄由� 16吏꾩닔�뒗 �븵�뿉 0�쓣 遺숈엫.
+			//2占쎌쁽�뵳占� 16筌욊쑴�땾�몴占� 占쏙옙�눧紐꾩쁽嚥∽옙, 域밸챶�봺�⑨옙 1占쎌쁽�뵳占� 16筌욊쑴�땾占쎈뮉 占쎈링占쎈퓠 0占쎌뱽 �겫�늿�뿫.
 			MacAddress += String.format("%02X%s", byte_MacAddress[i], (i < MacAddress.length() - 1) ? "" : "");
 			
 			if (i != 5) {
-				//2�옄由� 16吏꾩닔 �옄由� �떒�쐞 �뮘�뿉 "-"遺숈뿬二쇨린
+				//2占쎌쁽�뵳占� 16筌욊쑴�땾 占쎌쁽�뵳占� 占쎈뼊占쎌맄 占쎈츟占쎈퓠 "-"�겫�늿肉т틠�눊由�
 				MacAddress += "-";
 			}
 		} 
@@ -508,14 +508,14 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		return MacAddress;
 	}
 
-	public String get_IpAddress(byte[] byte_IpAddress) { //MAC Byte二쇱냼瑜� String�쑝濡� 蹂��솚
+	public String get_IpAddress(byte[] byte_IpAddress) { //MAC Byte雅뚯눘�꺖�몴占� String占쎌몵嚥∽옙 癰귨옙占쎌넎
 		String IpAddress = "";
 		for (int i = 0; i < 4; i++) {
-			//2�옄由� 16吏꾩닔瑜� ��臾몄옄濡�, 洹몃━怨� 1�옄由� 16吏꾩닔�뒗 �븵�뿉 0�쓣 遺숈엫.
+			//2占쎌쁽�뵳占� 16筌욊쑴�땾�몴占� 占쏙옙�눧紐꾩쁽嚥∽옙, 域밸챶�봺�⑨옙 1占쎌쁽�뵳占� 16筌욊쑴�땾占쎈뮉 占쎈링占쎈퓠 0占쎌뱽 �겫�늿�뿫.
 			IpAddress += String.valueOf(byte_IpAddress[i] & 0xFF);
 
 			if (i != 3) {
-				//2�옄由� 16吏꾩닔 �옄由� �떒�쐞 �뮘�뿉 "-"遺숈뿬二쇨린
+				//2占쎌쁽�뵳占� 16筌욊쑴�땾 占쎌쁽�뵳占� 占쎈뼊占쎌맄 占쎈츟占쎈퓠 "-"�겫�늿肉т틠�눊由�
 				IpAddress += ":";
 			}
 		}
@@ -523,27 +523,27 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		return IpAddress;
 	}
 
-	public boolean Receive(byte[] input) { //硫붿떆吏� Receive
-		// TODO: Receive 구현
+	public boolean Receive(byte[] input) { //筌롫뗄�뻻筌욑옙 Receive
+		// TODO: Receive 援ы쁽
 		return true;
 	}
 
-	// GUI의 ARPCacheEntryWindow를 업데이트하는 함수
+	// GUI�쓽 ARPCacheEntryWindow瑜� �뾽�뜲�씠�듃�븯�뒗 �븿�닔
 	public static void UpdateARPCacheEntryWindow(Hashtable<String, ARPLayer._ARP_Cache_Entry> table) {
 		model_arp.removeAllElements();
 		if(table.size() > 0) {
 			for(Map.Entry<String, ARPLayer._ARP_Cache_Entry> e : table.entrySet()) {
-				String targetIP = e.getKey();	// 타겟 IP 주소
+				String targetIP = e.getKey();	// ��寃� IP 二쇱냼
 				if(targetIP == null || targetIP.length() == 0)	return;
 
 				String macAddr_string = "";
-				byte[] macAddr_bytearray = e.getValue().addr;	// mac 주소
+				byte[] macAddr_bytearray = e.getValue().addr;	// mac 二쇱냼
 				if(macAddr_bytearray == null || macAddr_bytearray.length == 0) {
-					// mac 주소 모르는 경우
+					// mac 二쇱냼 紐⑤Ⅴ�뒗 寃쎌슦
 					macAddr_string = "????????????";
 				} else {
-					// mac 주소 아는 경우=
-					// : 붙이기
+					// mac 二쇱냼 �븘�뒗 寃쎌슦=
+					// : 遺숈씠湲�
 					macAddr_string += String.format("%02X", (0xFF & macAddr_bytearray[0])) + ":"
 							+ String.format("%02X", (0xFF & macAddr_bytearray[1])) + ":"
 							+ String.format("%02X", (0xFF & macAddr_bytearray[2])) + ":"
@@ -552,9 +552,9 @@ public class ARPDlg extends JFrame implements BaseLayer {
 							+ String.format("%02X", (0xFF & macAddr_bytearray[5]));
 				}
 
-				String status = e.getValue().status? "complete" : "incomplete";		// status 정보
+				String status = e.getValue().status? "complete" : "incomplete";		// status �젙蹂�
 
-				// Window에 표시될 최종 정보
+				// Window�뿉 �몴�떆�맆 理쒖쥌 �젙蹂�
 				String itemText = String.format("%-20s %-20s %-20s", targetIP, macAddr_string, status);
 
 				model_arp.addElement(itemText);

@@ -221,7 +221,7 @@ public class ARPLayer implements BaseLayer {
             Thread obj = new Thread(arpThread);
 		    obj.start();// ARP Reply 대기
             try {
-                obj.join();
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -233,7 +233,7 @@ public class ARPLayer implements BaseLayer {
 
 		    
 		    // Ping 패킷의 Mac 주소 업데이트 
-		    System.arraycopy(macAddr, 0, input, 18, 6);
+		    System.arraycopy(macAddr, 0, input, 10, 6);
 		    
 		    // 업데이트한 Ping 패킷 하위 레이어로 전송
 		    this.GetUnderLayer().Send(input, input.length, PortNum);
@@ -262,7 +262,7 @@ public class ARPLayer implements BaseLayer {
 	    
 		@Override
 		public void run() {
-            GetUnderLayer().Send(input, input.length, portNum);
+			GetUnderLayer().Send(input, input.length, portNum);
             while(true) {
                 ((NILayer) GetUnderLayer().GetUnderLayer()).Receive(portNum);
                 System.out.println("run 반복중....");
@@ -272,7 +272,7 @@ public class ARPLayer implements BaseLayer {
             		e.printStackTrace();
             	}
                 _ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
-				if(temp.status){
+				if(temp.status == true){
 					break;
 				}
 			}
@@ -281,11 +281,11 @@ public class ARPLayer implements BaseLayer {
     
     
     // ARP Reply : receive에서 src주소와 dst주소를 뒤집은 Frame에 OPCODE 수정하여 반환함
-    public boolean Send(byte[] reply_pack) {
+    public boolean Send(byte[] reply_pack, int PortNum) {
     	byte[] temp = intToByte2(2);	// ARP Reply	: 0x02
     	reply_pack[6] = temp[0];	
     	reply_pack[7] = temp[1];
-        ((EthernetLayer)this.GetUnderLayer()).ARPReplySend(reply_pack, reply_pack.length);
+        ((EthernetLayer)this.GetUnderLayer()).ARPReplySend(reply_pack, reply_pack.length, PortNum);
     	
     	return true;
     }
@@ -381,15 +381,17 @@ public class ARPLayer implements BaseLayer {
         return true;
     }
 
-    public synchronized boolean Receive(byte[] input) {
+    public synchronized boolean Receive(byte[] input, int portNum) {
         byte[] srcMac = new byte[6];
         byte[] srcIp = new byte[4];
         byte[] dstMac = new byte[6];
         byte[] dstIp = new byte[4];
+
         System.arraycopy(input, 8, srcMac, 0, 6);
         System.arraycopy(input, 14, srcIp, 0, 4);
         System.arraycopy(input, 18, dstMac, 0, 6);
         System.arraycopy(input, 24, dstIp, 0, 4);
+
         String srcIP_string = ipByteToString(srcIp);
         String dstIP_string = ipByteToString(dstIp);
 
@@ -400,8 +402,9 @@ public class ARPLayer implements BaseLayer {
                 _ARP_Cache_Entry entry = new _ARP_Cache_Entry(srcMac, true, 30);
                 ARP_Cache_table.put(srcIP_string, entry); // hashtable 원소 => <String, entry>
                 ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+                              
                 byte[] swappedInput = swap(input);
-                Send(swappedInput);
+                Send(swappedInput,portNum);
             }
             // 위 if문 내 자신의 Mac Address 추가해야함.
             // 자신의 Mac & Ip는 어디 저장되어 있는지??

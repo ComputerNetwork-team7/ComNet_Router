@@ -57,11 +57,11 @@ public class ApplicationLayer implements BaseLayer {
     }
     
   /**/
-    private void fragSend(byte[] input, int length) { // 단편화
+    private void fragSend(byte[] input, int length) { // �떒�렪�솕
     	byte[] bytes = new byte[packet_size];
     	int i = 0;
     	m_sHeader.app_totlen = intToByte2(length);
-    	m_sHeader.app_type = (byte) (0x01); // 단편화 시작 패킷
+    	m_sHeader.app_type = (byte) (0x01); // �떒�렪�솕 �떆�옉 �뙣�궥
     	
     	System.arraycopy(input,  0 , bytes, 0, packet_size);
     	bytes = objToByte(m_sHeader, bytes, packet_size);
@@ -69,18 +69,18 @@ public class ApplicationLayer implements BaseLayer {
     	
     	int maxLen = length / packet_size;
     	
-    	m_sHeader.app_type = (byte) (0x02); // 단편화 중간 패킷
+    	m_sHeader.app_type = (byte) (0x02); // �떒�렪�솕 以묎컙 �뙣�궥
     	m_sHeader.app_totlen = intToByte2(packet_size);
     	for (i=1; i<maxLen; i++) {
     		if(i+1<maxLen && length%packet_size == 0) {
-    			m_sHeader.app_type = (byte) (0x03); // 단편화 마지막 패킷
+    			m_sHeader.app_type = (byte) (0x03); // �떒�렪�솕 留덉�留� �뙣�궥
     		}
     		System.arraycopy(input, packet_size*i, bytes, 0, packet_size);
     		bytes = objToByte(m_sHeader, bytes, packet_size);
     		this.GetUnderLayer().Send(bytes, bytes.length);
     	}
     	if ( length % packet_size != 0) {
-    		m_sHeader.app_type = (byte) (0x03);  // 단편화 마지막 패킷
+    		m_sHeader.app_type = (byte) (0x03);  // �떒�렪�솕 留덉�留� �뙣�궥
     		m_sHeader.app_totlen = intToByte2(length%packet_size);
     		bytes = new byte[length % packet_size];
     		System.arraycopy(input,  length-(length%packet_size), bytes, 0, length%packet_size);
@@ -105,8 +105,8 @@ public class ApplicationLayer implements BaseLayer {
     
     public boolean GARP_Send() {
     	/*
-    	 * ApplicationLayer의 G-ARP Send 함수
-    	 * IPLayer의 G-ARP Send 함수를 호출함
+    	 * ApplicationLayer�쓽 G-ARP Send �븿�닔
+    	 * IPLayer�쓽 G-ARP Send �븿�닔瑜� �샇異쒗븿
     	 */
     	((IPLayer) this.GetUnderLayer()).GARP_Send();
     	return true;
@@ -114,28 +114,28 @@ public class ApplicationLayer implements BaseLayer {
  
     public synchronized boolean Receive(byte[] input) {
     	/*
-    	 * ApplicationLayer의 Receive 함수
-    	 * IPLayer로부터 받은 데이터의 헤더를 제거하고
-    	 * GUILayer의 Receive 함수를 호출함
+    	 * ApplicationLayer�쓽 Receive �븿�닔
+    	 * IPLayer濡쒕��꽣 諛쏆� �뜲�씠�꽣�쓽 �뿤�뜑瑜� �젣嫄고븯怨�
+    	 * GUILayer�쓽 Receive �븿�닔瑜� �샇異쒗븿
     	 */
     	byte[] data, tempBytes;
 		int tempType = 0;
 
 		tempType |= (byte) (input[2] & 0xFF);
-		if (tempType == 0) {	// 단편화되지 않은 데이터, ARP 동작은 여기에 해당
+		if (tempType == 0) {	// �떒�렪�솕�릺吏� �븡�� �뜲�씠�꽣, ARP �룞�옉�� �뿬湲곗뿉 �빐�떦
 			data = RemoveappHeader(input, input.length);
 			this.GetUpperLayer(0).Receive(data);
-		} else {	// 단편화된 데이터
-			if (tempType == 1) {	// 단편화된 데이터의 첫 부분
+		} else {	// �떒�렪�솕�맂 �뜲�씠�꽣
+			if (tempType == 1) {	// �떒�렪�솕�맂 �뜲�씠�꽣�쓽 泥� 遺�遺�
 				int size = byte2ToInt(input[0], input[1]);
 				fragBytes = new byte[size];
 				fragCount = 1;
 				tempBytes = RemoveappHeader(input, input.length);
 				System.arraycopy(tempBytes, 0, fragBytes, 0, packet_size);
-			} else {	// 단편화된 데이터의 중간 부분
+			} else {	// �떒�렪�솕�맂 �뜲�씠�꽣�쓽 以묎컙 遺�遺�
 				tempBytes = RemoveappHeader(input, input.length);
 				System.arraycopy(tempBytes, 0, fragBytes, (fragCount++) * packet_size, byte2ToInt(input[0], input[1]));
-				if (tempType == 3) {	// 단편화된 데이터의 끝 부분
+				if (tempType == 3) {	// �떒�렪�솕�맂 �뜲�씠�꽣�쓽 �걹 遺�遺�
 					this.GetUpperLayer(0).Receive(fragBytes);
 				}
 			}

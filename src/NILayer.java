@@ -55,10 +55,10 @@ public class NILayer implements BaseLayer {
 		return m_pAdapterList.get(iIndex);
 	}
 
-	public void SetAdapterNumber(int iNum, int PortNum) {
+	public void SetAdapterNumber(int iNum) {
 		m_iNumAdapter = iNum;
 		PacketStartDriver();
-		Receive(PortNum);
+		Receive();
 	}
 
 	public void SetAdapterList() {
@@ -86,8 +86,9 @@ public class NILayer implements BaseLayer {
 		return true;
 	}
 
-	public boolean Receive(int PortNum) {
-		Receive_Thread thread = new Receive_Thread(m_AdapterObject.get(PortNum), this.GetUpperLayer(0));
+	public boolean Receive() {
+		Receive_Thread thread = new Receive_Thread(m_AdapterObject.get(m_iNumAdapter), 
+				this.GetUpperLayer(0), m_iNumAdapter);
 		Thread obj = new Thread(thread);
 		obj.start();
 		return false;
@@ -178,13 +179,13 @@ class Receive_Thread implements Runnable {
 	byte[] data;
 	Pcap AdapterObject;
 	BaseLayer UpperLayer;
-	//int portNum;
+	int portNum;
 
-	public Receive_Thread(Pcap m_AdapterObject, BaseLayer m_UpperLayer) {
+	public Receive_Thread(Pcap m_AdapterObject, BaseLayer m_UpperLayer,int portNum) {
 		// TODO Auto-generated constructor stub
 		AdapterObject = m_AdapterObject;
 		UpperLayer = m_UpperLayer;
-		//this.portNum = portNum;
+		this.portNum = portNum;
 	}
 
 	@Override
@@ -193,7 +194,7 @@ class Receive_Thread implements Runnable {
 			PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
 				public void nextPacket(PcapPacket packet, String user) {
 					data = packet.getByteArray(0, packet.size());
-					UpperLayer.Receive(data);
+					UpperLayer.Receive(data, portNum);
 				}
 			};
 

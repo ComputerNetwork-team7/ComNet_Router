@@ -107,7 +107,7 @@ public class EthernetLayer implements BaseLayer {
 	}
 
 	// ARP Reply Send 함수
-	public boolean ARPReplySend(byte[] input, int length) {
+	public boolean ARPReplySend(byte[] input, int length ,int portNum) {
 		// ARP Packet의 dst Mac을 enet_dst 설정
 		for(int i = 0; i < 6; i++) {
 			m_sHeader.enet_dstaddr.addr[i] = input[18+i];
@@ -118,7 +118,7 @@ public class EthernetLayer implements BaseLayer {
 
 		// data에 헤더를 붙여서 Send
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
-		this.GetUnderLayer().Send(bytes, length + 14);
+		this.GetUnderLayer().Send(bytes, length + 14, portNum);
 		return true;
 
 	}
@@ -150,6 +150,31 @@ public class EthernetLayer implements BaseLayer {
 
 		return false;
 	}
+
+	public synchronized boolean Receive(byte[] input, int portNum) {
+		byte[] data;
+		byte[] temp_src = m_sHeader.enet_srcaddr.addr;
+
+		// Ethernet 프레임 헤더 중에 16비트(2 byte) 프로토콜 타입 필드를 보고 판단하여 상위 계층으로 전달 (enet_type)
+		if(input[12] == (byte) 0x08 && input[13] == (byte) 0x06) {	// 0X0806 - ARP (첫 번째 상위레이어)
+			if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
+				data = RemoveEthernetHeader(input, input.length);
+				this.GetUpperLayer(0).Receive(data,portNum);	// To ARPLayer
+				return true;
+			}
+		}
+
+		else if(input[12] == (byte) 0x08 && input[13] == (byte) 0x00) {	// 0x0800 - IP (두 번째 상위레이어)
+			if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
+				data = RemoveEthernetHeader(input, input.length);
+				this.GetUpperLayer(1).Receive(data);	// To IPLayer
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 
     private byte[] intToByte2(int value) {
         byte[] temp = new byte[2];
