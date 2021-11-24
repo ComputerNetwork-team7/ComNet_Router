@@ -7,12 +7,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class ARPDlg extends JFrame implements BaseLayer {
+public class StaticRouterDlg extends JFrame implements BaseLayer {
 	
 	public class AddressTableEntry {
 		byte[] srcIpAddr;
@@ -78,12 +77,12 @@ public class ARPDlg extends JFrame implements BaseLayer {
 		m_LayerMgr.AddLayer(new ARPLayer("ARP"));
 		m_LayerMgr.AddLayer(new IPLayer("IP"));
 		m_LayerMgr.AddLayer(new ApplicationLayer("Application"));
-		m_LayerMgr.AddLayer(new ARPDlg("GUI"));
+		m_LayerMgr.AddLayer(new StaticRouterDlg("GUI"));
 		
 		m_LayerMgr.ConnectLayers(" NI ( *Ethernet ( *ARP ( *IP ) *IP ( *Application ( *GUI ) ) ) )");
 	}
 
-	public ARPDlg(String pName) {
+	public StaticRouterDlg(String pName) {
 		pLayerName = pName;
 
 		// Frame

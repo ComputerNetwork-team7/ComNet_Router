@@ -123,7 +123,7 @@ public class ARPLayer implements BaseLayer {
     public byte[] ObjToByte(_ARP_HEADER Header, int portNum) {
         byte[] buf = new byte[28];	
         
-        ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(portNum); 
+        StaticRouterDlg.AddressTableEntry temp = StaticRouterDlg.AddressTable.get(portNum);
         
         buf[0] = Header.macType[0];
         buf[1] = Header.macType[1];
@@ -189,7 +189,7 @@ public class ARPLayer implements BaseLayer {
     	String dstIP;
     	m_sHeader.dstIp.addr = byte_dstIP;
     	
-    	ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(PortNum); 
+    	StaticRouterDlg.AddressTableEntry temp = StaticRouterDlg.AddressTable.get(PortNum);
     	
     	dstIP = ipByteToString(byte_dstIP); // 추출한 dstIP
     	
@@ -313,7 +313,7 @@ public class ARPLayer implements BaseLayer {
         ARP_Cache_table.put(ip_key, newItem);
 
         // GUI update
-        ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+        StaticRouterDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
     }
 
     // arp cache entry를 해시테이블에서 삭제하는 함수
@@ -321,14 +321,14 @@ public class ARPLayer implements BaseLayer {
         ARP_Cache_table.remove(ip_key);
 
         // GUI update
-        ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+        StaticRouterDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
     }
 
     public static void deleteAllARPEntry() {
         ARP_Cache_table.clear();
 
         // GUI update
-        ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+        StaticRouterDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
     }
 
     // ARPLayer가 받은 패킷의 ARP Header에서 dstIP를 확인하고
@@ -394,7 +394,7 @@ public class ARPLayer implements BaseLayer {
                 // 자신의 주소와 같거나 혹은 Proxytable에 있는지 검사.
                 _ARP_Cache_Entry entry = new _ARP_Cache_Entry(srcMac, true, 30);
                 ARP_Cache_table.put(srcIP_string, entry); // hashtable 원소 => <String, entry>
-                ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+                StaticRouterDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
                               
                 byte[] swappedInput = swap(input);
                 Send(swappedInput,portNum);
@@ -407,12 +407,12 @@ public class ARPLayer implements BaseLayer {
                     _ARP_Cache_Entry entry = ARP_Cache_table.get(srcIP_string);
                     System.arraycopy(srcMac, 0, entry.addr, 0 , 6);
                     ARP_Cache_table.replace(srcIP_string, entry);
-                    ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+                    StaticRouterDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
                 }
                 else if(!checkAddressWithMyIp(srcIp)){//BroadCast
                     _ARP_Cache_Entry entry = new _ARP_Cache_Entry(srcMac, true, 30);
                     ARP_Cache_table.put(srcIP_string, entry); // hashtable 원소 => <String, entry>
-                    ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+                    StaticRouterDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
                 }
             }
         }
@@ -423,7 +423,7 @@ public class ARPLayer implements BaseLayer {
                 entry.addr = srcMac;
                 entry.status = true;
                 ARP_Cache_table.replace(srcIP_string, entry);
-                ARPDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
+                StaticRouterDlg.UpdateARPCacheEntryWindow(ARP_Cache_table);
             }
         }
         return true;

@@ -30,13 +30,13 @@ public class IPLayer implements BaseLayer {
         _ROUTING_ELEMENT newItem = new _ROUTING_ELEMENT(dst, subnet, gateway, flag, adaptNum);
         Routing_Table.add(newItem);
 
-        ARPDlg.UpdateRoutingTableWindow(Routing_Table);
+        StaticRouterDlg.UpdateRoutingTableWindow(Routing_Table);
     }
 
     public void deleteRoutingEntry(int i) {
         Routing_Table.remove(i);
 
-        ARPDlg.UpdateRoutingTableWindow(Routing_Table);
+        StaticRouterDlg.UpdateRoutingTableWindow(Routing_Table);
     }
     
     private class _IP_HEADER {

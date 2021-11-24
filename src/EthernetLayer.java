@@ -90,7 +90,7 @@ public class EthernetLayer implements BaseLayer {
 		}
 
 		// data에 헤더를 붙여서 Send
-		ARPDlg.AddressTableEntry temp = ARPDlg.AddressTable.get(portNum);
+		StaticRouterDlg.AddressTableEntry temp = StaticRouterDlg.AddressTable.get(portNum);
 		m_sHeader.enet_srcaddr.addr = temp.srcMacAddr;
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
 		this.GetUnderLayer().Send(bytes, length + 14, portNum);
