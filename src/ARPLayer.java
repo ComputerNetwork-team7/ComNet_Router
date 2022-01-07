@@ -23,7 +23,8 @@ public class ARPLayer implements BaseLayer {
         _IP_ADDR srcIp;					// Sender's protocol Address
         _ETHERNET_ADDR dstMac;			// Target's hardware Address
         _IP_ADDR dstIp;					// Target's protocol Address
-
+        String x = "dd";
+        
         public _ARP_HEADER() {          // 28 Bytes
             this.macType = new byte[2];			    // 2 Bytes / 0 ~ 1
             this.ipType = new byte[2];			    // 2 Bytes / 2 ~ 3
@@ -264,6 +265,11 @@ public class ARPLayer implements BaseLayer {
 		public void run() {
 			GetUnderLayer().Send(input, input.length, portNum);
             while(true) {
+            	try {
+            		Thread.sleep(100);	
+            	}catch (Exception e){
+            		e.printStackTrace();
+            	}            	
                  _ARP_Cache_Entry temp = ARP_Cache_table.get(dstIp);
 				if(temp.status == true){
 					break;
